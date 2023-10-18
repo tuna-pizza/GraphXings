@@ -63,6 +63,8 @@ public class Game
         try
         {
             int crossingsGame1 = playRound(player1, player2);
+            player1.initializeNextRound();
+            player2.initializeNextRound();
             int crossingsGame2 = playRound(player2, player1);
             return new GameResult(crossingsGame1,crossingsGame2,player1,player2,false,false);
         }

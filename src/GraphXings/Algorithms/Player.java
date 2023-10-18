@@ -22,7 +22,7 @@ public interface Player
      * @param placedVertices A set of the already placed vertices.
      * @param width The width of the game board.
      * @param height The height of the game board.
-     * @return
+     * @return The move to be performed.
      */
     public GameMove maximizeCrossings(Graph g, HashMap<Vertex,Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height);
     /**
@@ -35,7 +35,7 @@ public interface Player
      * @param placedVertices A set of the already placed vertices.
      * @param width The width of the game board.
      * @param height The height of the game board.
-     * @return
+     * @return The move to be performed.
      */
     public GameMove minimizeCrossings(Graph g, HashMap<Vertex,Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height);
 
