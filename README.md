@@ -1,6 +1,7 @@
 # GraphXings
 
 An implementation of the asymmetric game GraphXings where two players 1 and 2 compete against each other in two game rounds. In each turn, the player is to position an unplaced vertex of a known graph on the integer grid. In the first round, the goal of player 1 is to create as many crossings as possible whereas player 2 attempts to avoid crossings. In the second round the objectives are swapped. The winner is the player who created more crossings when maximizing the number of crossings.
+
 See https://i11www.iti.kit.edu/projects/cyclexings/index for a human-playable instance where the graph is always a cycle.
 
 The structure of the package GraphXings is as follows:
