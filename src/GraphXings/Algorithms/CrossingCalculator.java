@@ -56,4 +56,30 @@ public class CrossingCalculator
         }
         return crossingNumber/2;
     }
+    public int computePartialCrossingNumber()
+    {
+        int crossingNumber = 0;
+        for (Edge e1 : g.getEdges())
+        {
+            if (vertexCoordinates.containsKey(e1.getS()) && vertexCoordinates.containsKey(e1.getT())) // Check if both vertices of e1 are placed
+            {
+                for (Edge e2 : g.getEdges())
+                {
+                    if (!e1.equals(e2) && vertexCoordinates.containsKey(e2.getS()) && vertexCoordinates.containsKey(e2.getT())) // Check if both vertices of e2 are placed
+                    {
+                        if (!e1.isAdjacent(e2))
+                        {
+                            Segment s1 = new Segment(vertexCoordinates.get(e1.getS()),vertexCoordinates.get(e1.getT()));
+                            Segment s2 = new Segment(vertexCoordinates.get(e2.getS()),vertexCoordinates.get(e2.getT()));
+                            if (Segment.intersect(s1,s2))
+                            {
+                                crossingNumber++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return crossingNumber/2;
+    }
 }
