@@ -124,9 +124,6 @@ public class Game
         }
         while (turn < g.getN())
         {
-            CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
-            gameField.setCrossingNumber(cc.computePartialCrossingNumber());
-
             GameMove newMove;
             Graph copyOfG = g.copy();
             LinkedList<GameMove> copyOfGameMoves = copyGameMoves(gameMoves);
@@ -157,6 +154,8 @@ public class Game
             turn++;
            
             gameField.drawField(vertexCoordinates);
+            CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
+            gameField.setCrossingNumber(cc.computePartialCrossingNumber());
             
             System.out.println("Press enter to continue");
             scanner.nextLine();

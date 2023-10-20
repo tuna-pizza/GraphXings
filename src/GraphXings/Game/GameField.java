@@ -103,10 +103,13 @@ public class GameField extends JPanel {
             circleLocations.add(new Point(x, y));
             }
         }
+
+        // comment in to draw lines between vertices depending on order placed
         // if (circleLocations.size() > 1) {
         //     lineLocations.add(new Point[]{circleLocations.get(circleLocations.size() - 1), circleLocations.get(circleLocations.size() - 2)}); // Adds a line between the last two circles.
         // }
-
+        
+        // comment in to draw lines between vertices depending on their id
         for (Vertex v : vertexCoordinates.keySet()) {
             for (Vertex w : vertexCoordinates.keySet()) {
                 if (v.equals(w)) {
