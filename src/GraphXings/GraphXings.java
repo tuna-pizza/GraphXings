@@ -1,6 +1,7 @@
 package GraphXings;
 
 import GraphXings.Algorithms.ExperimentalPlayer;
+import GraphXings.Algorithms.MinMaxPlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
@@ -72,7 +73,7 @@ public class GraphXings
         System.out.println("Starting Game");
 
         // Run the game with two players.
-        Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new RandomPlayer("Player 2"));
+        Game game = new Game(g,5,5,new ExperimentalPlayer("Player 1"), new ExperimentalPlayer("Player 2"));
         GameResult res = game.play();
         // Display the result!
         System.out.println(res.announceResult());

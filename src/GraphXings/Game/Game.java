@@ -158,7 +158,7 @@ public class Game
             gameField.setCrossingNumber(cc.computePartialCrossingNumber());
             
             System.out.println("Press enter to continue");
-            scanner.nextLine();
+            //scanner.nextLine();
         }
         CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
         return  cc.computeCrossingNumber();
