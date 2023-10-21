@@ -81,6 +81,10 @@ public class Segment
         }
     }
 
+    public boolean exists(){
+        return this.exists;
+    }
+
     /**
      * Gets whether the segment is vertical.
      * @return True if the segment is vertical, false otherwise.

@@ -1,10 +1,13 @@
 package GraphXings;
 
+import GraphXings.Algorithms.ExperimentalPlayer;
+import GraphXings.Algorithms.MinMaxPlayer;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
+import GraphXings.Game.GameField;
 import GraphXings.Game.GameResult;
 
 public class GraphXings
@@ -53,8 +56,24 @@ public class GraphXings
         g.addEdge(e8);
         g.addEdge(e9);
         g.addEdge(e10);
+
+        // g.addEdge(new Edge(v1,v1));
+        // g.addEdge(new Edge(v2,v2));
+        // g.addEdge(new Edge(v3,v3));
+        // g.addEdge(new Edge(v4,v4));
+        // g.addEdge(new Edge(v5,v5));
+        // g.addEdge(new Edge(v6,v6));
+        // g.addEdge(new Edge(v7,v7));
+        // g.addEdge(new Edge(v8,v8));
+        // g.addEdge(new Edge(v9,v9));
+        // g.addEdge(new Edge(v10,v10));
+        
+
+
+        System.out.println("Starting Game");
+
         // Run the game with two players.
-        Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new RandomPlayer("Player 2"));
+        Game game = new Game(g,5,5,new ExperimentalPlayer("Player 1"), new ExperimentalPlayer("Player 2"));
         GameResult res = game.play();
         // Display the result!
         System.out.println(res.announceResult());

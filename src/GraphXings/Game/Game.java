@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.*;
+
 
 /**
  * A class for managing a game of GraphXings!
@@ -37,6 +41,10 @@ public class Game
      */
     private Player player2;
 
+    private GameField gameField;
+    private GameField gameField2;
+    private Scanner scanner;
+
     /**
      * Instantiates a game of GraphXings.
      * @param g The graph to be drawn.
@@ -52,6 +60,10 @@ public class Game
         this.height = height;
         this.player1 = player1;
         this.player2 = player2;
+
+        this.gameField = new GameField(width, height);
+        
+        scanner = new Scanner(System.in); 
     }
 
     /**
@@ -65,6 +77,10 @@ public class Game
             int crossingsGame1 = playRound(player1, player2);
             player1.initializeNextRound();
             player2.initializeNextRound();
+
+            this.gameField2 = gameField;
+            gameField = new GameField(width, height);
+            //gameField.reset();
             int crossingsGame2 = playRound(player2, player1);
             return new GameResult(crossingsGame1,crossingsGame2,player1,player2,false,false);
         }
@@ -122,19 +138,27 @@ public class Game
                     throw new InvalidMoveException(maximizer);
                 }
             }
-           else
-           {
+            else
+            {
                 newMove = minimizer.minimizeCrossings(copyOfG,copyOfVertexCoordinates,copyOfGameMoves,copyOfUsedCoordinates,copyOfPlacedVertices,width,height);
                 if (!checkMoveValidity(newMove,placedVertices,usedCoordinates))
                 {
                     throw new InvalidMoveException(minimizer);
                 }
-           }
-           gameMoves.add(newMove);
-           usedCoordinates[newMove.getCoordinate().getX()][newMove.getCoordinate().getY()]=1;
-           placedVertices.add(newMove.getVertex());
-           vertexCoordinates.put(newMove.getVertex(), newMove.getCoordinate());
-           turn++;
+            }
+            //gameField.drawMove(newMove);
+            gameMoves.add(newMove);
+            usedCoordinates[newMove.getCoordinate().getX()][newMove.getCoordinate().getY()]=1;
+            placedVertices.add(newMove.getVertex());
+            vertexCoordinates.put(newMove.getVertex(), newMove.getCoordinate());
+            turn++;
+           
+            gameField.drawField(vertexCoordinates);
+            CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
+            gameField.setCrossingNumber(cc.computePartialCrossingNumber());
+            
+            System.out.println("Press enter to continue");
+            //scanner.nextLine();
         }
         CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
         return  cc.computeCrossingNumber();
