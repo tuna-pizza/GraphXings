@@ -158,8 +158,22 @@ public class Segment
     {
         if (!s1.isVertical() && !s2.isVertical())
         {
-            Rational x = Rational.dividedBy(Rational.minus(s1.getA(),s2.getA()),Rational.minus(s2.getB(),s1.getB()));
-            return (Rational.lesserEqual(s1.getStartX(),x)&&Rational.lesserEqual(s2.getStartX(),x)&&Rational.lesserEqual(x,s1.getEndX())&&Rational.lesserEqual(x,s2.getEndX()));
+            if (!Rational.equals(s1.getA(),s2.getA()))
+            {
+                Rational x = Rational.dividedBy(Rational.minus(s2.getB(), s1.getB()), Rational.minus(s1.getA(), s2.getA()));
+                return (Rational.lesserEqual(s1.getStartX(), x) && Rational.lesserEqual(s2.getStartX(), x) && Rational.lesserEqual(x, s1.getEndX()) && Rational.lesserEqual(x, s2.getEndX()));
+            }
+            else
+            {
+                if (Rational.equals(s1.getB(),s2.getB()))
+                {
+                    return ((Rational.lesserEqual(s1.getStartX(), s2.getStartX()) && Rational.lesserEqual(s2.getStartX(), s1.getEndX())) || (Rational.lesserEqual(s2.getStartX(), s1.getStartX()) && Rational.lesserEqual(s1.getStartX(), s2.getEndX())));
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
         if (!s1.isVertical())
         {
@@ -170,7 +184,7 @@ public class Segment
         if (!s2.isVertical())
         {
             Rational y = Rational.plus(Rational.times(s2.getA(),s1.getStartX()),s2.getB());
-            return (Rational.lesserEqual(s2.getStartX(),s1.getStartX()) && Rational.lesserEqual(s1.getStartX(),s2.getEndX()) && Rational.lesserEqual(s1.getStartY(),y) && Rational.lesserEqual(y,s2.getEndY()));
+            return (Rational.lesserEqual(s2.getStartX(),s1.getStartX()) && Rational.lesserEqual(s1.getStartX(),s2.getEndX()) && Rational.lesserEqual(s1.getStartY(),y) && Rational.lesserEqual(y,s1.getEndY()));
         }
         else
         {
@@ -186,7 +200,7 @@ public class Segment
                     s1 = s2;
                     s2 = swap;
                 }
-                return (Rational.lesserEqual(s2.getStartX(),s1.getEndY()));
+                return (Rational.lesserEqual(s2.getStartY(),s1.getEndY()));
             }
         }
     }

@@ -69,6 +69,11 @@ public class Rational
      */
     private void simplify()
     {
+        if (q < 0)
+        {
+            p = -p;
+            q = -q;
+        }
         int ggt = 1;
         for (int r = 2; r <= Math.min(p,q);r++)
         {
@@ -79,6 +84,10 @@ public class Rational
         }
         p = p/ggt;
         q = q/ggt;
+        if (p==0)
+        {
+            q=1;
+        }
     }
 
     /**
@@ -122,6 +131,10 @@ public class Rational
      */
     static public Rational dividedBy(Rational r1, Rational r2)
     {
+        if (r2.getP() == 0)
+        {
+            throw new ArithmeticException();
+        }
         return new Rational(r1.getP()*r2.getQ(),r1.getQ()*r2.getP());
     }
 
