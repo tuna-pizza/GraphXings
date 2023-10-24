@@ -1,5 +1,6 @@
 package GraphXings;
 
+import GraphXings.Algorithms.BetterThenRandom;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
@@ -54,7 +55,7 @@ public class GraphXings
         g.addEdge(e9);
         g.addEdge(e10);
         // Run the game with two players.
-        Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new RandomPlayer("Player 2"));
+        Game game = new Game(g,5,4,new BetterThenRandom("Better Player"), new RandomPlayer("Random"));
         GameResult res = game.play();
         // Display the result!
         System.out.println(res.announceResult());
