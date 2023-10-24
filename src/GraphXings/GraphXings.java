@@ -1,16 +1,18 @@
 package GraphXings;
 
 import GraphXings.Algorithms.RandomPlayer;
+import GraphXings.Algorithms.Player01;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
 import GraphXings.Game.GameResult;
 
-public class GraphXings
-{
-    public static void main (String[] args)
-    {
+import java.util.HashMap;
+import java.util.Map;
+
+public class GraphXings {
+    public static void main(String[] args) {
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
         Vertex v1 = new Vertex("1");
@@ -54,9 +56,34 @@ public class GraphXings
         g.addEdge(e9);
         g.addEdge(e10);
         // Run the game with two players.
-        Game game = new Game(g,5,4,new RandomPlayer("Player 1"), new RandomPlayer("Player 2"));
-        GameResult res = game.play();
-        // Display the result!
-        System.out.println(res.announceResult());
+        // // Game game = new Game(g, 5, 4, new RandomPlayer("Player 1"), new
+        // // RandomPlayer("Player 2"));
+        // Game game = new Game(g, 5, 4, new RandomPlayer("Player 1"), new
+        // Player01("Player 2"));
+        // GameResult res = game.play();
+        // // Display the result!
+        // System.out.println(res.announceResult());
+
+        int runs = 10000;
+        Game game;
+        GameResult res;
+        int[] results = new int[runs];
+        for (int i = 0; i < runs; i++) {
+            game = new Game(g, 5, 4, new RandomPlayer("Player 1"), new Player01("Player 2"));
+            res = game.play();
+            results[i] = res.winner();
+        }
+
+        Map<Integer, Integer> hm = new HashMap();
+
+        for (Integer x : results) {
+
+            if (!hm.containsKey(x)) {
+                hm.put(x, 1);
+            } else {
+                hm.put(x, hm.get(x) + 1);
+            }
+        }
+        System.out.println(hm);
     }
 }

@@ -106,14 +106,13 @@ public class Game {
 
             // TODO
             // Printing the Map after each move
-            System.out.println("-Turn:" + turn + "-");
-            for (int i = 0; i < copyOfUsedCoordinates.length; i++) {
-                for (int j = 0; j < copyOfUsedCoordinates[i].length; j++) {
-                    System.out.print(copyOfUsedCoordinates[i][j] + " ");
-                }
-                System.out.println();
-
-            }
+            // System.out.println("-Turn:" + turn + "-");
+            // for (int i = 0; i < copyOfUsedCoordinates.length; i++) {
+            // for (int j = 0; j < copyOfUsedCoordinates[i].length; j++) {
+            // System.out.print(copyOfUsedCoordinates[i][j] + " ");
+            // }
+            // System.out.println();
+            // }
             // TODO
 
             if (turn % 2 == 0) {
