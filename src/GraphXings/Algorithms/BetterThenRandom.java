@@ -15,13 +15,15 @@ public class BetterThenRandom implements Player {
     }
 
     @Override
-    public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        return bruteforceMax(g,usedCoordinates,placedVertices,width,height, gameMoves, vertexCoordinates );
+    public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
+            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
+        return bruteforceMax(g, usedCoordinates, placedVertices, width, height, gameMoves, vertexCoordinates);
     }
 
     @Override
-    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        return bruteforceMin(g,usedCoordinates,placedVertices,width,height, gameMoves, vertexCoordinates );
+    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
+            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
+        return bruteforceMin(g, usedCoordinates, placedVertices, width, height, gameMoves, vertexCoordinates);
     }
 
     @Override
@@ -30,35 +32,38 @@ public class BetterThenRandom implements Player {
     }
 
     /**
-     * Take's information of the state of the game and loops through all of the possibilities
+     * Take's information of the state of the game and loops through all of the
+     * possibilities
      * returns the coordinates and the current vertex with the most crossings
+     * 
      * @return the best gamemove
      */
-    private GameMove bruteforceMax(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, List<GameMove> gameMoves, HashMap<Vertex,Coordinate> vertexCoordinates) {
+    private GameMove bruteforceMax(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width,
+            int height, List<GameMove> gameMoves, HashMap<Vertex, Coordinate> vertexCoordinates) {
 
-        //if first move is random, the winrate spikes from 80-90% to 90-95%
-        if(gameMoves.size() == 0) {
-            System.out.println("is empty");
-            return randomMove(g,usedCoordinates,placedVertices,width,height);
+        // if first move is random, the winrate spikes from 80-90% to 90-95%
+        if (gameMoves.size() == 0) {
+            // System.out.println("is empty");
+            return randomMove(g, usedCoordinates, placedVertices, width, height);
         }
 
         Coordinate c;
         Vertex v;
-        v = nextVertex(g,placedVertices);
+        v = nextVertex(g, placedVertices);
         Graph graphCopy;
-        HashMap<Vertex,Coordinate> vertexCoordinatesCopy = new HashMap<>(vertexCoordinates);
-        HashMap<Coordinate,Integer> scoreMap = new HashMap<>();
+        HashMap<Vertex, Coordinate> vertexCoordinatesCopy = new HashMap<>(vertexCoordinates);
+        HashMap<Coordinate, Integer> scoreMap = new HashMap<>();
 
-        //looping through the map
+        // looping through the map
         for (int i = 0; i < usedCoordinates.length; i++) {
 
             for (int j = 0; j < usedCoordinates[i].length; j++) {
                 if (usedCoordinates[i][j] == 0) {
-                    c = new Coordinate(i,j);
+                    c = new Coordinate(i, j);
                     graphCopy = g;
 
-                    vertexCoordinatesCopy.put(v,c);
-                    scoreMap.put(c, computeIntermediateCrossingNumber(graphCopy,vertexCoordinatesCopy));
+                    vertexCoordinatesCopy.put(v, c);
+                    scoreMap.put(c, computeIntermediateCrossingNumber(graphCopy, vertexCoordinatesCopy));
 
                     break;
                 }
@@ -67,86 +72,85 @@ public class BetterThenRandom implements Player {
 
         }
         c = highestScoredCoordinate(scoreMap);
-        return new GameMove(v,c);
+        return new GameMove(v, c);
     }
 
     /**
-     * Take's information of the state of the game and loops through all of the possibilities
+     * Take's information of the state of the game and loops through all of the
+     * possibilities
      * returns the coordinates and the current vertex with the least crossings
+     * 
      * @return the best gamemove
      */
-    private GameMove bruteforceMin(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, List<GameMove> gameMoves, HashMap<Vertex,Coordinate> vertexCoordinates) {
+    private GameMove bruteforceMin(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width,
+            int height, List<GameMove> gameMoves, HashMap<Vertex, Coordinate> vertexCoordinates) {
 
         Coordinate c;
         Vertex v;
-        v = nextVertex(g,placedVertices);
+        v = nextVertex(g, placedVertices);
         Graph graphCopy;
-        HashMap<Vertex,Coordinate> vertexCoordinatesCopy;
-        HashMap<Coordinate,Integer> scoreMap = new HashMap<>();
+        HashMap<Vertex, Coordinate> vertexCoordinatesCopy;
+        HashMap<Coordinate, Integer> scoreMap = new HashMap<>();
 
-        //looping through the map
+        // looping through the map
         for (int i = 0; i < usedCoordinates.length; i++) {
             for (int j = 0; j < usedCoordinates[i].length; j++) {
                 if (usedCoordinates[i][j] == 0) {
-                    c = new Coordinate(i,j);
+                    c = new Coordinate(i, j);
                     graphCopy = g;
                     vertexCoordinatesCopy = vertexCoordinates;
-                    vertexCoordinatesCopy.put(v,c);
-                    scoreMap.put(c, computeIntermediateCrossingNumber(graphCopy,vertexCoordinatesCopy));
+                    vertexCoordinatesCopy.put(v, c);
+                    scoreMap.put(c, computeIntermediateCrossingNumber(graphCopy, vertexCoordinatesCopy));
                     break;
                 }
             }
         }
         c = lowestScoredCoordinate(scoreMap);
-        return new GameMove(v,c);
+        return new GameMove(v, c);
     }
-
 
     /**
      * Computes a random valid move. is a copy from the random player class
-     * @param g The graph.
+     * 
+     * @param g               The graph.
      * @param usedCoordinates The used coordinates.
-     * @param placedVertices The already placed vertices.
-     * @param width The width of the game board.
-     * @param height The height of the game board.
+     * @param placedVertices  The already placed vertices.
+     * @param width           The width of the game board.
+     * @param height          The height of the game board.
      * @return A random valid move.
      */
-    private GameMove randomMove(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
-    {
+    private GameMove randomMove(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width,
+            int height) {
         Random r = new Random();
 
-        int stillToBePlaced = g.getN()- placedVertices.size();
+        int stillToBePlaced = g.getN() - placedVertices.size();
         int next = r.nextInt(stillToBePlaced);
         int skipped = 0;
-        Vertex v=null;
-        for (Vertex u : g.getVertices())
-        {
-            if (!placedVertices.contains(u))
-            {
-                if (skipped < next)
-                {
+        Vertex v = null;
+        for (Vertex u : g.getVertices()) {
+            if (!placedVertices.contains(u)) {
+                if (skipped < next) {
                     skipped++;
                     continue;
                 }
-                v=u;
+                v = u;
                 break;
             }
         }
-        Coordinate c = new Coordinate(0,0);
-        do
-        {
-            c = new Coordinate(r.nextInt(width),r.nextInt(height));
-        }
-        while (usedCoordinates[c.getX()][c.getY()]!=0);
-        return new GameMove(v,c);
+        Coordinate c = new Coordinate(0, 0);
+        do {
+            c = new Coordinate(r.nextInt(width), r.nextInt(height));
+        } while (usedCoordinates[c.getX()][c.getY()] != 0);
+        return new GameMove(v, c);
     }
 
     /**
      * calculates the highest value from
+     * 
      * @param scoreMap
      * @return the coordinate from its value
      */
-    private Coordinate highestScoredCoordinate( HashMap<Coordinate,Integer> scoreMap) {
+    private Coordinate highestScoredCoordinate(HashMap<Coordinate, Integer> scoreMap) {
         Entry<Coordinate, Integer> highestEntry = null;
 
         for (Entry<Coordinate, Integer> entry : scoreMap.entrySet()) {
@@ -157,22 +161,22 @@ public class BetterThenRandom implements Player {
 
         if (highestEntry != null) {
             int highestValue = highestEntry.getValue();
-            System.out.println("Crossings: " + highestValue);
+            // System.out.println("Crossings: " + highestValue);
 
         } else {
 
         }
-
 
         return highestEntry.getKey();
     }
 
     /**
      * calculates the lowest value from
+     * 
      * @param scoreMap
      * @return the coordinate from its value
      */
-    private Coordinate lowestScoredCoordinate( HashMap<Coordinate,Integer> scoreMap) {
+    private Coordinate lowestScoredCoordinate(HashMap<Coordinate, Integer> scoreMap) {
 
         Entry<Coordinate, Integer> minEntry = null;
 
@@ -184,33 +188,28 @@ public class BetterThenRandom implements Player {
 
         if (minEntry != null) {
             int lowestValue = minEntry.getValue();
-            System.out.println("Crossings: " + lowestValue);
+            // System.out.println("Crossings: " + lowestValue);
         }
-
 
         return minEntry.getKey();
     }
 
-
-
     /**
      * Helper function to determinate the next vertex
-     * @param g is the given graph
+     * 
+     * @param g              is the given graph
      * @param placedVertices are the already placed vertexes
      * @return the next, not placed vertex
      */
     private Vertex nextVertex(Graph g, HashSet<Vertex> placedVertices) {
 
-        for (Vertex u : g.getVertices())
-        {
-            if (!placedVertices.contains(u))
-            {
+        for (Vertex u : g.getVertices()) {
+            if (!placedVertices.contains(u)) {
                 return u;
             }
         }
         return null;
     }
-
 
     private int computeIntermediateCrossingNumber(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates) {
         int crossingNumber = 0;
@@ -237,8 +236,6 @@ public class BetterThenRandom implements Player {
         }
         return crossingNumber / 2;
     }
-
-
 
     @Override
     public String getName() {
