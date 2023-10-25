@@ -62,9 +62,11 @@ public class Game
     {
         try
         {
+            player1.initializeNextRound(g.copy(),width,height, Player.Role.MAX);
+            player2.initializeNextRound(g.copy(),width,height, Player.Role.MIN);
             int crossingsGame1 = playRound(player1, player2);
-            player1.initializeNextRound();
-            player2.initializeNextRound();
+            player1.initializeNextRound(g.copy(),width,height, Player.Role.MIN);
+            player2.initializeNextRound(g.copy(),width,height, Player.Role.MAX);
             int crossingsGame2 = playRound(player2, player1);
             return new GameResult(crossingsGame1,crossingsGame2,player1,player2,false,false);
         }
