@@ -51,6 +51,10 @@ public class GameResult
         this.cheatingPlayer2 = cheatingPlayer2;
     }
 
+    /**
+     * Gets the winning player.
+     * @return The winning player.
+     */
     public Player getWinner()
     {
         if (cheatingPlayer1)

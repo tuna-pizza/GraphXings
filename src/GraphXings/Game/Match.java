@@ -1,12 +1,35 @@
 package GraphXings.Game;
-import GraphXings.Data.Graph;
 import GraphXings.Algorithms.Player;
+
+/**
+ * A class managing a Best of X type match of GraphXings.
+ */
 public class Match
 {
+	/**
+	 * The first player.
+	 */
 	private Player player1;
+	/**
+	 * The second player.
+	 */
 	private Player player2;
+	/**
+	 * The game instance factory.
+	 */
 	private GameInstanceFactory factory;
+	/**
+	 * The number of games to be played.
+	 */
 	private int bestOutOf;
+
+	/**
+	 * Constructs a match object.
+	 * @param player1 The first player.
+	 * @param player2 The second player.
+	 * @param factory The game instance factory to be used for created the games!
+	 * @param bestOutOf The number of games to be played.
+	 */
 	public Match(Player player1, Player player2, GameInstanceFactory factory, int bestOutOf)
 	{
 		this.player1 = player1;
@@ -14,6 +37,11 @@ public class Match
 		this.bestOutOf = bestOutOf;
 		this.factory = factory;
 	}
+
+	/**
+	 * Plays the match.
+	 * @return A MatchResult object containing the results of the match.
+	 */
 	public MatchResult play()
 	{
 		boolean end = false;
