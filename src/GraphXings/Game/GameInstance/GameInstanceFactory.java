@@ -1,6 +1,4 @@
-package GraphXings.Game;
-
-import GraphXings.Game.GameInstance;
+package GraphXings.Game.GameInstance;
 
 /**
  * An interface for classes that can generate game instances.

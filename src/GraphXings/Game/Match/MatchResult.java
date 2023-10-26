@@ -1,4 +1,4 @@
-package GraphXings.Game;
+package GraphXings.Game.Match;
 
 import GraphXings.Algorithms.Player;
 

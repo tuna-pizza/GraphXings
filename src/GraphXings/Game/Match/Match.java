@@ -1,5 +1,9 @@
-package GraphXings.Game;
+package GraphXings.Game.Match;
 import GraphXings.Algorithms.Player;
+import GraphXings.Game.Game;
+import GraphXings.Game.GameInstance.GameInstance;
+import GraphXings.Game.GameInstance.GameInstanceFactory;
+import GraphXings.Game.GameResult;
 
 /**
  * A class managing a Best of X type match of GraphXings.

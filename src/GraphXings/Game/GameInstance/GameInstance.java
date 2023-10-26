@@ -1,4 +1,4 @@
-package GraphXings.Game;
+package GraphXings.Game.GameInstance;
 import GraphXings.Data.Graph;
 
 /**
