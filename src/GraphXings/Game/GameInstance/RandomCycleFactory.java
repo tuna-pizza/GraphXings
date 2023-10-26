@@ -4,13 +4,29 @@ import java.util.Random;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Data.Edge;
+
+/**
+ * A class for generating random instances where a cycle is to be drawn.
+ */
 public class RandomCycleFactory implements GameInstanceFactory
 {
+	/**
+	 * The random number generator.
+	 */
 	private Random r;
+
+	/**
+	 * Standard constructor which uses the normal seed generation of Random.
+	 */
 	public RandomCycleFactory()
 	{
 		r = new Random();
 	}
+
+	/**
+	 * Constructor that allows to specify a seed for the Random object allowing for replicable results.
+	 * @param seed The seed for the Random object.
+	 */
 	public RandomCycleFactory(long seed)
 	{
 		r = new Random(seed);
@@ -43,6 +59,12 @@ public class RandomCycleFactory implements GameInstanceFactory
 		return new GameInstance(g,width,height);
 	}
 
+	/**
+	 * Computes the power of an int.
+	 * @param base An integer base.
+	 * @param exp An integer exponent.
+	 * @return The integer power.
+	 */
 	private int pow (int base, int exp)
 	{
 		int res = 1;
@@ -53,6 +75,11 @@ public class RandomCycleFactory implements GameInstanceFactory
 		return res;
 	}
 
+	/**
+	 * Creates a cycle of length n.
+	 * @param n The length of the cycle.
+	 * @return A cycle of length n.
+	 */
 	private Graph createCycle(int n)
 	{
 		int id = 0;
