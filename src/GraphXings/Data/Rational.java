@@ -31,6 +31,10 @@ public class Rational
      */
     public Rational (int p, int q)
     {
+        if (q == 0)
+        {
+            throw new ArithmeticException();
+        }
         this.p = p;
         this.q = q;
         simplify();
@@ -69,18 +73,50 @@ public class Rational
      */
     private void simplify()
     {
-        int ggt = 1;
-        for (int r = 2; r <= Math.min(p,q);r++)
+        if (q < 0)
         {
-            if (p%r == 0 && q%r == 0)
-            {
-                ggt = r;
-            }
+            p = -p;
+            q = -q;
         }
-        p = p/ggt;
-        q = q/ggt;
+        int gcd = gcd(p,q);
+        p = p/gcd;
+        q = q/gcd;
+        if (p==0)
+        {
+            q=1;
+        }
     }
 
+    /**
+     * Computes the gcd of two integers. Uses the Euclidean algorithm.
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The gcd of a and b.
+     */
+    private int gcd(int a, int b)
+    {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        if (a < b)
+        {
+            int swap = b;
+            b = a;
+            a = swap;
+        }
+        if (b == 0)
+        {
+            return 1;
+        }
+        int c = a % b;
+        if (c == 0)
+        {
+            return b;
+        }
+        else
+        {
+            return gcd(b,c);
+        }
+    }
     /**
      * Computes the sum of two rational numbers.
      * @param r1 The first addend.
@@ -122,6 +158,10 @@ public class Rational
      */
     static public Rational dividedBy(Rational r1, Rational r2)
     {
+        if (r2.getP() == 0)
+        {
+            throw new ArithmeticException();
+        }
         return new Rational(r1.getP()*r2.getQ(),r1.getQ()*r2.getP());
     }
 

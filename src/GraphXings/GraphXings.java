@@ -1,6 +1,9 @@
 package GraphXings;
 
-import GraphXings.Algorithms.GoodPlayer;
+import java.util.HashMap;
+import java.util.Map;
+
+import GraphXings.Algorithms.BetterThenRandom;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
@@ -52,10 +55,33 @@ public class GraphXings {
         g.addEdge(e8);
         g.addEdge(e9);
         g.addEdge(e10);
-        // Run the game with two players.
-        Game game = new Game(g, 5, 4, new RandomPlayer("Player 1"), new GoodPlayer("Player 2"));
-        GameResult res = game.play();
-        // Display the result!
-        System.out.println(res.announceResult());
+        // // Run the game with two players.
+        // // Game game = new Game(g,5,4,new BetterThenRandom("Better Player"), new
+        // RandomPlayer("Random"));
+        // GameResult res = game.play();
+        // // Display the result!
+        // System.out.println(res.announceResult());
+
+        int runs = 1000;
+        Game game;
+        GameResult res;
+        String[] results = new String[runs];
+        for (int i = 0; i < runs; i++) {
+            game = new Game(g, 5, 4, new BetterThenRandom("BruteForce"), new RandomPlayer("Random"));
+            res = game.play();
+            results[i] = res.winner("BruteForce", "Random");
+        }
+
+        Map<String, Integer> hm = new HashMap();
+
+        for (String x : results) {
+
+            if (!hm.containsKey(x)) {
+                hm.put(x, 1);
+            } else {
+                hm.put(x, hm.get(x) + 1);
+            }
+        }
+        System.out.println(hm);
     }
 }

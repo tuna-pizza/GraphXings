@@ -36,7 +36,7 @@ public class Edge
         {
             return false;
         }
-        return ((s.equals(other.getS())&t.equals(other.getT())) || (t.equals(other.getS())&s.equals(other.getT())));
+        return ((s.equals(other.getS())&&t.equals(other.getT())) || (t.equals(other.getS())&&s.equals(other.getT())));
     }
 
     /**
