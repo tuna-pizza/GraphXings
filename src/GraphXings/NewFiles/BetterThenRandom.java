@@ -1,16 +1,17 @@
-package GraphXings.Algorithms;
+package GraphXings.NewFiles;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import GraphXings.Game.GameMove;
+import GraphXings.Algorithms.Player;
 import GraphXings.Data.*;
 
 /**
  * A player that bruteforces the, hopefully, best solution
  */
-public class GoodPlayer implements Player {
+public class BetterThenRandom implements Player {
     /**
      * The name of the Good palyer
      */
@@ -21,7 +22,7 @@ public class GoodPlayer implements Player {
      * 
      * @param name
      */
-    public GoodPlayer(String name) {
+    public BetterThenRandom(String name) {
         this.name = name;
     }
 
@@ -31,8 +32,6 @@ public class GoodPlayer implements Player {
         if (gameMoves.size() > 0) {
             System.out.println("last placed vertex: " + gameMoves.get(gameMoves.size() - 1).getVertex().getId());
         }
-        System.out.println(
-                "Currently there are: " + computeIntermediateCrossingNumber(g, vertexCoordinates) + " crossings");
         System.out.println("maximizing");
         Vertex v = null;
         for (Vertex v_ : g.getVertices()) {
@@ -42,7 +41,8 @@ public class GoodPlayer implements Player {
             }
         }
         System.out.println("Placing vertex: " + v.getId());
-        int numberOfCrossings = computeIntermediateCrossingNumber(g, vertexCoordinates);
+        // Number of crossings before we placed the vertex
+        int numberOfCrossings = computeAdditionalCrossings(g, vertexCoordinates, v);
         int bestX = 0;
         int bestY = 0;
         // Find first valid field where we can place vertex, starting condition
@@ -53,7 +53,10 @@ public class GoodPlayer implements Player {
                     bestY = possibleY;
                     HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
                     vertexCoordinates_.put(v, new Coordinate(possibleX, possibleY));
-                    numberOfCrossings = computeIntermediateCrossingNumber(g, vertexCoordinates_);
+                    // Placing vertex at first available space then breaking and store
+                    // numberOfCrossings to compare against
+                    numberOfCrossings = computeAdditionalCrossings(g, vertexCoordinates_, v);
+                    break;
                 }
             }
         }
@@ -65,7 +68,7 @@ public class GoodPlayer implements Player {
                     continue;
                 HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
                 vertexCoordinates_.put(v, new Coordinate(possibleX, possibleY));
-                int intermediateCrossingNumber = computeIntermediateCrossingNumber(g, vertexCoordinates_);
+                int intermediateCrossingNumber = computeAdditionalCrossings(g, vertexCoordinates_, v);
                 System.out.println("If we place vertex at " + possibleX + " " + possibleY + " there would be "
                         + intermediateCrossingNumber + " crossings");
                 if (intermediateCrossingNumber > numberOfCrossings) {
@@ -85,8 +88,6 @@ public class GoodPlayer implements Player {
         if (gameMoves.size() > 0) {
             System.out.println("last placed vertex: " + gameMoves.get(gameMoves.size() - 1).getVertex().getId());
         }
-        System.out.println(
-                "Currently there are: " + computeIntermediateCrossingNumber(g, vertexCoordinates) + " crossings");
         System.out.println("minimizing");
         Vertex v = null;
         for (Vertex v_ : g.getVertices()) {
@@ -96,7 +97,7 @@ public class GoodPlayer implements Player {
             }
         }
         System.out.println("Placing vertex: " + v.getId());
-        int numberOfCrossings = computeIntermediateCrossingNumber(g, vertexCoordinates);
+        int numberOfCrossings = computeAdditionalCrossings(g, vertexCoordinates, v);
         int bestX = 0;
         int bestY = 0;
         // Find first valid field where we can place vertex, starting condition
@@ -107,7 +108,7 @@ public class GoodPlayer implements Player {
                     bestY = possibleY;
                     HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
                     vertexCoordinates_.put(v, new Coordinate(possibleX, possibleY));
-                    numberOfCrossings = computeIntermediateCrossingNumber(g, vertexCoordinates_);
+                    numberOfCrossings = computeAdditionalCrossings(g, vertexCoordinates_, v);
                 }
             }
         }
@@ -119,7 +120,7 @@ public class GoodPlayer implements Player {
                     continue;
                 HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
                 vertexCoordinates_.put(v, new Coordinate(possibleX, possibleY));
-                int intermediateCrossingNumber = computeIntermediateCrossingNumber(g, vertexCoordinates_);
+                int intermediateCrossingNumber = computeAdditionalCrossings(g, vertexCoordinates_, v);
                 System.out.println("If we place vertex at " + possibleX + " " + possibleY + " there would be "
                         + intermediateCrossingNumber + " crossings");
                 if (intermediateCrossingNumber < numberOfCrossings) {
@@ -139,9 +140,11 @@ public class GoodPlayer implements Player {
      * 
      * @return The number of crossings.
      */
-    private int computeIntermediateCrossingNumber(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates) {
+    private int computeAdditionalCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, Vertex addedVertex) {
         int crossingNumber = 0;
         for (Edge e1 : g.getEdges()) {
+            if (e1.getS() != addedVertex && e1.getT() != addedVertex)
+                continue;
             for (Edge e2 : g.getEdges()) {
                 if (!e1.equals(e2)) {
                     if (!e1.isAdjacent(e2)) {

@@ -106,13 +106,13 @@ public class Game {
 
             // Printing the Map after each move
             System.out.println("-Turn:" + turn + "-");
-            for (int i = 0; i < copyOfUsedCoordinates.length; i++) {
-                for (int j = 0; j < copyOfUsedCoordinates[i].length; j++) {
-                    System.out.print(copyOfUsedCoordinates[i][j] + " ");
-                }
-                System.out.println();
-
-            }
+            // for (int i = 0; i < copyOfUsedCoordinates.length; i++) {
+            // for (int j = 0; j < copyOfUsedCoordinates[i].length; j++) {
+            // System.out.print(copyOfUsedCoordinates[i][j] + " ");
+            // }
+            // System.out.println();
+            //
+            // }
 
             if (turn % 2 == 0) {
                 newMove = maximizer.maximizeCrossings(copyOfG, copyOfVertexCoordinates, copyOfGameMoves,
