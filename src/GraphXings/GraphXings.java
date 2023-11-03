@@ -15,7 +15,7 @@ public class GraphXings {
     public static void main(String[] args) {
         // Create a graph g. This time it is a 10-cycle!
         Graph g = new Graph();
-        int numberOfVertices = 100;
+        int numberOfVertices = 1000;
         Vertex firstVertex = new Vertex(Integer.toString(0));
         Vertex oldVertex = firstVertex;
         Vertex newVertex = null;
@@ -39,9 +39,9 @@ public class GraphXings {
         for (int i = 0; i < runs; i++) {
             System.out.print("Running game ");
             System.out.println(i);
-            game = new Game(g, 1000, 1000, new BetterThenRandom("ClosestVertex"), new RandomPlayer("Random"));
+            game = new Game(g, 1000, 1000, new BetterThenRandom("BetterThenRandom"), new RandomPlayer("Random"));
             res = game.play();
-            results[i] = res.winner("ClosestVertex", "Random");
+            results[i] = res.winner("BetterThenRandom", "Random");
         }
 
         Map<String, Integer> hm = new HashMap();
