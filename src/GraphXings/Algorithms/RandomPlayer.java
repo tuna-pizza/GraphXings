@@ -19,6 +19,10 @@ public class RandomPlayer implements Player
      * The name of the random player.
      */
     private String name;
+    /**
+     * A random number generator.
+     */
+    private Random r;
 
     /**
      * Creates a random player with the assigned name.
@@ -27,6 +31,7 @@ public class RandomPlayer implements Player
     public RandomPlayer(String name)
     {
         this.name = name;
+        this.r =  new Random(name.hashCode());
     }
 
     @Override
@@ -42,7 +47,7 @@ public class RandomPlayer implements Player
     }
 
     @Override
-    public void initializeNextRound()
+    public void initializeNextRound(Graph g, int width, int height, Role role)
     {
 
     }
@@ -58,7 +63,6 @@ public class RandomPlayer implements Player
      */
     private GameMove randomMove(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height)
     {
-        Random r = new Random();
         int stillToBePlaced = g.getN()- placedVertices.size();
         int next = r.nextInt(stillToBePlaced);
         int skipped = 0;

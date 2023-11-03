@@ -41,11 +41,20 @@ public interface Player
 
     /**
      * Tells the player to get ready for the next round.
+     * @param g The graph to be drawn in the next round.
+     * @param width The width of the game board.
+     * @param height The height of the game board.
+     * @param role The role in the next round, either MAX or MIN.
      */
-    public void initializeNextRound();
+    public void initializeNextRound(Graph g, int width, int height, Role role);
     /**
      * Gets the name of the player.
      * @return The player's name.
      */
     public String getName();
+
+    /**
+     * An enum describing the role of the player in the next round.
+     */
+    public enum Role {MAX,MIN};
 }

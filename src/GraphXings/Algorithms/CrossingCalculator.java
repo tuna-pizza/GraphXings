@@ -44,6 +44,10 @@ public class CrossingCalculator
                 {
                     if (!e1.isAdjacent(e2))
                     {
+                        if (!vertexCoordinates.containsKey(e1.getS()) || !vertexCoordinates.containsKey(e1.getT()) || !vertexCoordinates.containsKey(e2.getS())|| !vertexCoordinates.containsKey(e2.getT()))
+                        {
+                            continue;
+                        }
                         Segment s1 = new Segment(vertexCoordinates.get(e1.getS()),vertexCoordinates.get(e1.getT()));
                         Segment s2 = new Segment(vertexCoordinates.get(e2.getS()),vertexCoordinates.get(e2.getT()));
                         if (Segment.intersect(s1,s2))
