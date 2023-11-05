@@ -31,198 +31,175 @@ public class Player01 implements Player {
         this.name = name;
     }
 
+    public double myRound(double val) {
+        if (val < 0) {
+            return Math.ceil(val);
+        }
+        return Math.floor(val);
+    }
+
     @Override
     public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
             int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        class Rounder {
-            public double myRound(double val) {
-                if (val < 0) {
-                    return Math.ceil(val);
-                }
-                return Math.floor(val);
-            }
-        }
+        // place it as far away as possible (mirrored around center point)
+
         // get random move to start from
         GameMove rm = randomMove(g, usedCoordinates, placedVertices, width, height);
-
-        // place it as far away as possible (mirrored around center point)
         Vertex v = rm.getVertex();
-        Coordinate c = new Coordinate(0, 0);
+
+        // get both neighbors
+        Vertex next = null;
+        Vertex prev = null;
+        Vertex neighbor = null;
+        for (Vertex u : g.getVertices()) {
+            if ((Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(v.getId()) + 1) % g.getN()) {
+                next = u;
+            }
+            if ((Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(v.getId()) - 1) % g.getN()) {
+                prev = u;
+            }
+        }
 
         // check if one of the neighbors was placed already
-        String next = Integer.toString((Integer.parseInt(v.getId()) + 1) % g.getN() + 1);
-        String prev = Integer.toString((Integer.parseInt(v.getId()) - 1) % g.getN() + 1);
-        Vertex neighborNext = null;
-        Vertex neighborPrev = null;
-        for (Vertex u : g.getVertices()) {
-            if (u.getId().equals(next)) {
-                neighborNext = u;
+        boolean r = placedVertices.contains(next);
+        boolean t = placedVertices.contains(prev);
+        if (!r && !t) {
+            return rm;
+            // } else if (r && t) { // maximize both neighbors if both are set (later in
+            // game)
+            // // TODO: do the brute force maximizing here!!!
+            // return rm;
+        } else { // mirror around the center if only one is given
+            neighbor = r ? next : prev;
+            int x = vertexCoordinates.get(neighbor).getX();
+            int y = vertexCoordinates.get(neighbor).getY();
+            int ix = width - 1 - x;
+            int iy = height - 1 - y;
+            // mirror around the center
+            if (usedCoordinates[ix][iy] == 0) {
+                return new GameMove(v, new Coordinate(ix, iy));
             }
-            if (u.getId().equals(prev)) {
-                neighborPrev = u;
-            }
-        }
-
-        if (placedVertices.contains(neighborNext)) {
-            int x = vertexCoordinates.get(neighborNext).getX();
-            int y = vertexCoordinates.get(neighborNext).getY();
-            c = new Coordinate(width - 1 - x, height - 1 - y);
-            if (usedCoordinates[width - 1 - x][height - 1 - y] == 0) {
-                return new GameMove(v, c);
-            }
-            double deltaX = width - 1 - (2 * x);
-            double deltaY = height - 1 - (2 * y);
+            // if taken, take one further away
+            double deltaX = ix - x;
+            double deltaY = iy - y;
             double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             deltaX /= length;
             deltaY /= length;
             int curr = 1;
-            while (curr < length) {
-                // check diagonal point
-                int a = width - 1 - x - (int) new Rounder().myRound(curr * deltaX);
-                int b = height - 1 - y - (int) new Rounder().myRound(curr * deltaY);
-                if (usedCoordinates[a][b] == 0) {
-                    c = new Coordinate(a, b);
-                    return new GameMove(v, c);
+            while (true) {
+                // check diagonal point away from original (making it longer)
+                int a = ix + (int) myRound(curr * deltaX);
+                int b = iy + (int) myRound(curr * deltaY);
+                if (a < 0 || a >= width || b < 0 || b >= height) {
+                    break;
                 }
-
-                // // check in-between-diagonal-and-horizontal/vertical points
-                // for (int i = curr; i < length; i++) {
-                // int a2 = width - 1 - x + (int) new Rounder().myRound((i) * deltaX);
-                // int b2 = height - 1 - y + (int) new Rounder().myRound((i) * deltaY);
-                // if (a2 >= 0 && a2 < width && usedCoordinates[a2][b] == 0) {
-                // c = new Coordinate(a2, b);
-                // return new GameMove(v, c);
-                // }
-                // if (b2 >= 0 && b2 < height && usedCoordinates[a][b2] == 0) {
-                // c = new Coordinate(a, b2);
-                // return new GameMove(v, c);
-                // }
-                // }
-
-                // else get closer
+                if (usedCoordinates[a][b] == 0) {
+                    return new GameMove(v, new Coordinate(a, b));
+                }
+                // else get further away
                 curr++;
             }
         }
-
-        // same for previous neighbor (id-1)
-        if (placedVertices.contains(neighborPrev)) {
-            int x = vertexCoordinates.get(neighborPrev).getX();
-            int y = vertexCoordinates.get(neighborPrev).getY();
-            c = new Coordinate(width - 1 - x, height - 1 - y);
-            if (usedCoordinates[width - 1 - x][height - 1 - y] == 0) {
-                return new GameMove(v, c);
-            }
-            double deltaX = width - 1 - (2 * x);
-            double deltaY = height - 1 - (2 * y);
-            double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            deltaX /= length;
-            deltaY /= length;
-            int curr = 1;
-            while (curr < length) {
-                // check diagonal point
-                int a = width - 1 - x - (int) new Rounder().myRound(curr * deltaX);
-                int b = height - 1 - y - (int) new Rounder().myRound(curr * deltaY);
-                if (usedCoordinates[a][b] == 0) {
-                    c = new Coordinate(a, b);
-                    return new GameMove(v, c);
-                }
-
-                // check in-between-diagonal-and-horizontal/vertical points
-                for (int i = curr; i < length; i++) {
-                    int a2 = width - 1 - x + (int) new Rounder().myRound(i * deltaX);
-                    int b2 = height - 1 - y + (int) new Rounder().myRound(i * deltaY);
-                    if (a2 >= 0 && a2 < width && usedCoordinates[a2][b] == 0) {
-                        c = new Coordinate(a2, b);
-                        return new GameMove(v, c);
-                    }
-                    if (b2 >= 0 && b2 < height && usedCoordinates[a][b2] == 0) {
-                        c = new Coordinate(a, b2);
-                        return new GameMove(v, c);
-                    }
-                }
-
-                // else get closer
-                curr++;
-            }
-        }
-
         // else return the random move
         return rm;
 
+        // if (!r && !t) { // TODO: if neither neighbor is set get the neighbor that has
+        // 2 fixed neighbors
+        // // if possible
+        // } else if (r) { // check if next neighbor (id+1) can be placed next to the
+        // current vertex
+        // neighbor = next;
+        // } else if (t) { // check if previous neighbor (id-1) can be placed next to
+        // the current vertex
+        // neighbor = prev;
+        // } else { // if both are set
+        // return randomMove(g, usedCoordinates, placedVertices, width, height);
+        // }
+    }
+
+    public GameMove neighborMove(Vertex current, Vertex neighbor, Graph g,
+            HashMap<Vertex, Coordinate> vertexCoordinates,
+            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
+        int x = vertexCoordinates.get(current).getX();
+        int y = vertexCoordinates.get(current).getY();
+        int neighborhood = 3;
+        for (int i = 1; i < neighborhood; i++) {
+            for (int j = -i; j <= i; j++) {
+                if ((x + j) >= 0 && (x + j) < width) {
+                    for (int k = -i; k <= i; k++) {
+                        if (Math.abs(j) == i || Math.abs(k) == i) {
+                            if ((y + k) >= 0 && (y + k) < height) {
+                                if (usedCoordinates[x + j][y + k] == 0) {
+                                    return new GameMove(neighbor, new Coordinate(x + j, y + k));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return randomMove(g, usedCoordinates, placedVertices, width, height);
     }
 
     @Override
     public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
             int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        GameMove lastMove = gameMoves.getLast();
 
         // get the neighbor vertex
-        String next = Integer.toString((Integer.parseInt(lastMove.getVertex().getId()) + 1) % g.getN());
-        String prev = Integer.toString((Integer.parseInt(lastMove.getVertex().getId()) - 1) % g.getN());
-        if (next.equals("0")) {
-            next = "10";
-        }
-        if (prev.equals("0")) {
-            prev = "10";
-        }
-        Vertex neighborNext = null;
-        Vertex neighborPrev = null;
+        GameMove lastMove = gameMoves.getLast();
+        Vertex next = null;
+        Vertex prev = null;
+        Vertex nextnext = null;
+        Vertex prevprev = null;
+        Vertex neighbor = null;
+        Vertex current = lastMove.getVertex();
+
         for (Vertex u : g.getVertices()) {
-            if (u.getId().equals(next)) {
-                neighborNext = u;
-            }
-            if (u.getId().equals(prev)) {
-                neighborPrev = u;
-            }
-        }
-        // check if next neighbor (id+1) of last placed vertex can be placed next to it
-        if (!placedVertices.contains(neighborNext)) {
-            Coordinate c = new Coordinate(0, 0);
-            int x = vertexCoordinates.get(lastMove.getVertex()).getX();
-            int y = vertexCoordinates.get(lastMove.getVertex()).getY();
-            if ((x + 1) < width && usedCoordinates[x + 1][y] == 0) {
-                c = new Coordinate(x + 1, y);
-                return new GameMove(neighborNext, c);
-            }
-            if ((x - 1) >= 0 && usedCoordinates[x - 1][y] == 0) {
-                c = new Coordinate(x - 1, y);
-                return new GameMove(neighborNext, c);
-            }
-            if ((y + 1) < height && usedCoordinates[x][y + 1] == 0) {
-                c = new Coordinate(x, y + 1);
-                return new GameMove(neighborNext, c);
-            }
-            if ((y - 1) >= 0 && usedCoordinates[x][y - 1] == 0) {
-                c = new Coordinate(x, y - 1);
-                return new GameMove(neighborNext, c);
+            if (next == null
+                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) + 1)
+                            % g.getN()) {
+                next = u;
+            } else if (prev == null
+                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) - 1)
+                            % g.getN()) {
+                prev = u;
+            } else if (nextnext == null
+                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) + 2)
+                            % g.getN()) {
+                nextnext = u;
+            } else if (prevprev == null
+                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) - 2)
+                            % g.getN()) {
+                prevprev = u;
+            } else if (next != null && prev != null && nextnext != null && prevprev != null) {
+                break;
             }
         }
 
-        // check same for previous neighbor (id-1)
-        if (!placedVertices.contains(neighborPrev)) {
-            Coordinate c = new Coordinate(0, 0);
-            int x = vertexCoordinates.get(lastMove.getVertex()).getX();
-            int y = vertexCoordinates.get(lastMove.getVertex()).getY();
-            if ((x + 1) < width && usedCoordinates[x + 1][y] == 0) {
-                c = new Coordinate(x + 1, y);
-                return new GameMove(neighborPrev, c);
-            }
-            if ((x - 1) >= 0 && usedCoordinates[x - 1][y] == 0) {
-                c = new Coordinate(x - 1, y);
-                return new GameMove(neighborPrev, c);
-            }
-            if ((y + 1) < height && usedCoordinates[x][y + 1] == 0) {
-                c = new Coordinate(x, y + 1);
-                return new GameMove(neighborPrev, c);
-            }
-            if ((y - 1) >= 0 && usedCoordinates[x][y - 1] == 0) {
-                c = new Coordinate(x, y - 1);
-                return new GameMove(neighborPrev, c);
+        boolean r = placedVertices.contains(next);
+        boolean t = placedVertices.contains(prev);
+        boolean z = placedVertices.contains(nextnext);
+        boolean u = placedVertices.contains(prevprev);
+        if (!r && !t) { // TODO: if neither neighbor is set get the neighbor that has 2 fixed neighbors
+                        // if possible
+            neighbor = z ? next : (u ? prev : next);
+        } else if (!r) { // check if next neighbor (id+1) can be placed next to the current vertex
+            neighbor = next;
+        } else if (!t) { // check if previous neighbor (id-1) can be placed next to the current vertex
+            neighbor = prev;
+        } else { // if both are set
+            if (!z) {
+                current = next;
+                neighbor = nextnext;
+            } else if (!u) {
+                current = prev;
+                neighbor = prevprev;
+            } else {
+                return randomMove(g, usedCoordinates, placedVertices, width, height);
             }
         }
 
-        // else make a random move
-        return randomMove(g, usedCoordinates, placedVertices, width, height);
+        return neighborMove(current, neighbor, g, vertexCoordinates, usedCoordinates, placedVertices, width, height);
     }
 
     @Override
