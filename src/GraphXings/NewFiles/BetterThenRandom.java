@@ -18,6 +18,7 @@ public class BetterThenRandom implements Player {
      * The name of the Good palyer
      */
     private String name;
+    private BetterEdgeCrossing betterEdgeCrossing = new BetterEdgeCrossing();
 
     private int sampleSize = 10;
 
@@ -76,8 +77,11 @@ public class BetterThenRandom implements Player {
             if (usedCoordinates[xPositions.get(sample)][yPositions.get(sample)] != 0)
                 continue;
             HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
-            vertexCoordinates_.put(v, new Coordinate(xPositions.get(sample), yPositions.get(sample)));
-            int crossingsAddedByVertex = computeAdditionalCrossings(g, vertexCoordinates_, v);
+            Coordinate coordinateToAdd = new Coordinate(xPositions.get(sample), yPositions.get(sample));
+            vertexCoordinates_.put(v, coordinateToAdd);
+            betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
+            int crossingsAddedByVertex = betterEdgeCrossing.calculateIntersections(g.getEdges(), vertexCoordinates_);
+            betterEdgeCrossing.removeCoordinate(v);
             if (maximize ? crossingsAddedByVertex > bestCrossingsAddedByVertex
                     : crossingsAddedByVertex < bestCrossingsAddedByVertex) {
                 bestSample = sample;
@@ -86,46 +90,16 @@ public class BetterThenRandom implements Player {
         }
         // System.out.println("Placing at: " + xPositions.get(bestSample) + ", " +
         // yPositions.get(bestSample));
+        HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
+        Coordinate coordinateToAdd = new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample));
+        vertexCoordinates_.put(v, coordinateToAdd);
+        betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
         return new GameMove(v, new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample)));
-    }
-
-    /**
-     * Computes the number of crossings. The implementation is not efficient and
-     * iterates over all pairs of edges resulting in quadratic time.
-     * 
-     * @return The number of crossings.
-     */
-    private int computeAdditionalCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, Vertex addedVertex) {
-        int crossingNumber = 0;
-        for (Edge e1 : g.getEdges()) {
-            if (e1.getS() != addedVertex && e1.getT() != addedVertex)
-                continue;
-            for (Edge e2 : g.getEdges()) {
-                if (!e1.equals(e2)) {
-                    if (!e1.isAdjacent(e2)) {
-                        if (vertexCoordinates.get(e1.getS()) == null)
-                            continue;
-                        if (vertexCoordinates.get(e1.getT()) == null)
-                            continue;
-                        if (vertexCoordinates.get(e2.getS()) == null)
-                            continue;
-                        if (vertexCoordinates.get(e2.getT()) == null)
-                            continue;
-                        Segment s1 = new Segment(vertexCoordinates.get(e1.getS()), vertexCoordinates.get(e1.getT()));
-                        Segment s2 = new Segment(vertexCoordinates.get(e2.getS()), vertexCoordinates.get(e2.getT()));
-                        if (Segment.intersect(s1, s2)) {
-                            crossingNumber++;
-                        }
-                    }
-                }
-            }
-        }
-        return crossingNumber / 2;
     }
 
     @Override
     public void initializeNextRound() {
-
+        betterEdgeCrossing = new BetterEdgeCrossing();
     }
 
     @Override
