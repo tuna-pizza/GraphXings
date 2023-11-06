@@ -10,7 +10,7 @@ import GraphXings.Game.GameInstance.GameInstanceFactory;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.Match.Match;
 import GraphXings.Game.Match.MatchResult;
-import GraphXings.NewFiles.BetterThenRandom;
+import GraphXings.NewFiles.BetterThanRandom;
 
 public class GraphXings {
     public static void main(String[] args) {
@@ -18,7 +18,7 @@ public class GraphXings {
         int bestOutOf = 1;
 
         // matchup
-        Player player1 = new BetterThenRandom("BetterThanRandom");
+        Player player1 = new BetterThanRandom("BetterThanRandom");
         Player player2 = new RandomPlayer("Random");
 
         // type of game (random cycle -> true or constant -> false)
