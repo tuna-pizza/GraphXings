@@ -98,7 +98,7 @@ public class BetterThenRandom implements Player {
     }
 
     @Override
-    public void initializeNextRound() {
+    public void initializeNextRound(Graph g, int width, int height, Role role) {
         betterEdgeCrossing = new BetterEdgeCrossing();
     }
 
