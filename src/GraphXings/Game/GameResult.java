@@ -78,6 +78,54 @@ public class GameResult {
     }
 
     /**
+     * Gets the winning player.
+     * 
+     * @return The winning player.
+     */
+    public Player getWinner() {
+        if (cheatingPlayer1) {
+            return player2;
+        }
+        if (cheatingPlayer2) {
+            return player1;
+        }
+        if (crossingsGame1 == crossingsGame2) {
+            return null;
+        }
+        Player winner;
+        if (crossingsGame1 > crossingsGame2) {
+            winner = player1;
+        } else {
+            winner = player2;
+        }
+        return winner;
+    }
+
+    /**
+     * Gets the winning player.
+     * 
+     * @return The winning player.
+     */
+    public Player getWinner() {
+        if (cheatingPlayer1) {
+            return player2;
+        }
+        if (cheatingPlayer2) {
+            return player1;
+        }
+        if (crossingsGame1 == crossingsGame2) {
+            return null;
+        }
+        Player winner;
+        if (crossingsGame1 > crossingsGame2) {
+            winner = player1;
+        } else {
+            winner = player2;
+        }
+        return winner;
+    }
+
+    /**
      * Creates a string that announces the result!
      * 
      * @return A string announcing the result of the GraphXings game!
@@ -89,29 +137,25 @@ public class GameResult {
         if (cheatingPlayer2) {
             return (player2.getName() + " attempted an invalid move. " + player1.getName() + " wins!");
         }
-        Player winner = getWinner();
-        if (winner == null) {
+        if (crossingsGame1 == crossingsGame2) {
             return ("It's a tie between " + player1.getName() + " and " + player2.getName() + " with " + crossingsGame1
                     + " crossings!");
-        } else {
-            Player looser;
-            if (winner.equals(player1)) {
-                looser = player2;
-            } else {
-                looser = player1;
-            }
-            return (winner.getName() + " beats " + looser.getName() + " with " + crossingsGame1 + ":" + crossingsGame2
-                    + " crossings!");
         }
-    }
-
-    public String winner(String textOne, String textTwo) {
+        String winner;
+        int crossingsWinner;
+        String looser;
+        int crossingsLooser;
         if (crossingsGame1 > crossingsGame2) {
-            return textOne;
+            winner = player1.getName();
+            looser = player2.getName();
+            // crossingsWinner = crossingsGame1;
+            // crossingsLooser = crossingsGame2;
+        } else {
+            winner = player2.getName();
+            looser = player1.getName();
+            // crossingsWinner = crossingsGame2;
+            // crossingsLooser = crossingsGame1;
         }
-        if (crossingsGame1 < crossingsGame2) {
-            return textTwo;
-        }
-        return "Tie";
+        return (winner + " beats " + looser + " with " + crossingsGame1 + ":" + crossingsGame2 + " crossings!");
     }
 }

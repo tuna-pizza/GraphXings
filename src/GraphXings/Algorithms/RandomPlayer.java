@@ -22,6 +22,10 @@ public class RandomPlayer implements Player {
      * A random number generator.
      */
     private Random r;
+    /**
+     * A random number generator.
+     */
+    private Random r;
 
     /**
      * Creates a random player with the assigned name.
@@ -30,6 +34,7 @@ public class RandomPlayer implements Player {
      */
     public RandomPlayer(String name) {
         this.name = name;
+        this.r = new Random(name.hashCode());
         this.r = new Random(name.hashCode());
     }
 
