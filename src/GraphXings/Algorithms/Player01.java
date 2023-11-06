@@ -1,6 +1,7 @@
 package GraphXings.Algorithms;
 
 import GraphXings.Data.Coordinate;
+import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.Game;
@@ -8,8 +9,11 @@ import GraphXings.Game.GameMove;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 import java.lang.Math;
 
@@ -47,20 +51,13 @@ public class Player01 implements Player {
         GameMove rm = randomMove(g, usedCoordinates, placedVertices, width, height);
         Vertex v = rm.getVertex();
 
-        // get both neighbors
-        Vertex next = null;
-        Vertex prev = null;
-        Vertex neighbor = null;
-        for (Vertex u : g.getVertices()) {
-            if ((Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(v.getId()) + 1) % g.getN()) {
-                next = u;
-            }
-            if ((Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(v.getId()) - 1) % g.getN()) {
-                prev = u;
-            }
-        }
+        // get neighbors
+        LinkedList<Vertex> neighbors = getNeighbors(g, v);
+        Vertex next = neighbors.get(0);
+        Vertex prev = neighbors.get(1);
 
         // check if one of the neighbors was placed already
+        Vertex neighbor = null;
         boolean r = placedVertices.contains(next);
         boolean t = placedVertices.contains(prev);
         if (!r && !t) {
@@ -117,6 +114,16 @@ public class Player01 implements Player {
         // }
     }
 
+    public LinkedList<Vertex> getNeighbors(Graph g, Vertex v) {
+        Iterable<Edge> e = g.getIncidentEdges(v);
+        LinkedList<Vertex> neighbors = new LinkedList<>();
+        for (Edge edge : e) {
+            neighbors.add(v.equals(edge.getS()) ? edge.getS() : edge.getT());
+        }
+        assert neighbors.size() == 2;
+        return neighbors;
+    }
+
     public GameMove neighborMove(Vertex current, Vertex neighbor, Graph g,
             HashMap<Vertex, Coordinate> vertexCoordinates,
             int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
@@ -146,35 +153,17 @@ public class Player01 implements Player {
             int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
 
         // get the neighbor vertex
+        LinkedList<Vertex> neighbors = null;
         GameMove lastMove = gameMoves.getLast();
-        Vertex next = null;
-        Vertex prev = null;
-        Vertex nextnext = null;
-        Vertex prevprev = null;
-        Vertex neighbor = null;
         Vertex current = lastMove.getVertex();
-
-        for (Vertex u : g.getVertices()) {
-            if (next == null
-                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) + 1)
-                            % g.getN()) {
-                next = u;
-            } else if (prev == null
-                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) - 1)
-                            % g.getN()) {
-                prev = u;
-            } else if (nextnext == null
-                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) + 2)
-                            % g.getN()) {
-                nextnext = u;
-            } else if (prevprev == null
-                    && (Integer.parseInt(u.getId()) % g.getN()) == (Integer.parseInt(lastMove.getVertex().getId()) - 2)
-                            % g.getN()) {
-                prevprev = u;
-            } else if (next != null && prev != null && nextnext != null && prevprev != null) {
-                break;
-            }
-        }
+        neighbors = getNeighbors(g, current);
+        Vertex next = neighbors.get(0);
+        Vertex prev = neighbors.get(1);
+        neighbors = getNeighbors(g, next);
+        Vertex nextnext = current.equals(neighbors.get(0)) ? neighbors.get(1) : neighbors.get(0);
+        neighbors = getNeighbors(g, prev);
+        Vertex prevprev = current.equals(neighbors.get(0)) ? neighbors.get(1) : neighbors.get(0);
+        Vertex neighbor = null;
 
         boolean r = placedVertices.contains(next);
         boolean t = placedVertices.contains(prev);

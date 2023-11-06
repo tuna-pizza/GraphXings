@@ -66,10 +66,10 @@ public class GraphXings {
         // System.out.println(res.announceResult());
 
         // parameters
-        int runs = 100;
-        int numberOfVertices = 10;
-        int width = 1000;
-        int height = 1000;
+        int runs = 1;
+        int numberOfVertices = 10000;
+        int width = 10000;
+        int height = 10000;
 
         // build game
         Game game;
