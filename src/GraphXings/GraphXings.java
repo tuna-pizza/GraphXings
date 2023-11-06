@@ -1,59 +1,63 @@
 package GraphXings;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import GraphXings.Algorithms.Player;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
-import GraphXings.Game.Game;
-import GraphXings.Game.GameResult;
+import GraphXings.Game.GameInstance.ConstantGameInstanceFactory;
+import GraphXings.Game.GameInstance.GameInstanceFactory;
+import GraphXings.Game.GameInstance.RandomCycleFactory;
+import GraphXings.Game.Match.Match;
+import GraphXings.Game.Match.MatchResult;
 import GraphXings.NewFiles.BetterThenRandom;
 
 public class GraphXings {
     public static void main(String[] args) {
-        // Create a graph g. This time it is a 10-cycle!
-        Graph g = new Graph();
-        int numberOfVertices = 100;
-        Vertex firstVertex = new Vertex(Integer.toString(0));
-        Vertex oldVertex = firstVertex;
-        Vertex newVertex = null;
-        g.addVertex(oldVertex);
-        for (int i = 1; i < numberOfVertices; i++) {
-            newVertex = new Vertex(Integer.toString(i));
-            g.addVertex(newVertex);
-            Edge edge = new Edge(oldVertex, newVertex);
-            g.addEdge(edge);
-            oldVertex = newVertex;
-        }
-        if (newVertex != null) {
-            Edge edge = new Edge(newVertex, firstVertex);
-            g.addEdge(edge);
-        }
+        // number of games
+        int bestOutOf = 1;
 
-        int runs = 100;
-        Game game;
-        GameResult res;
-        String[] results = new String[runs];
-        for (int i = 0; i < runs; i++) {
-            System.out.print("Running game ");
-            System.out.println(i);
-            game = new Game(g, 100, 100, new BetterThenRandom("BetterThenRandom"), new RandomPlayer("Random"));
-            res = game.play();
-            results[i] = res.winner("BetterThenRandom", "Random");
-        }
+        // matchup
+        Player player1 = new BetterThenRandom("BetterThanRandom");
+        Player player2 = new RandomPlayer("Random");
 
-        Map<String, Integer> hm = new HashMap();
+        // type of game (random cycle -> true or constant -> false)
+        boolean cycleFactory = false;
 
-        for (String x : results) {
+        GameInstanceFactory gif = null;
+        if (cycleFactory) {
+            gif = new RandomCycleFactory();
+        } else {
+            // generate the graph for the constant game
+            int numberOfVertices = 10000;
+            int width = 10000;
+            int height = 10000;
 
-            if (!hm.containsKey(x)) {
-                hm.put(x, 1);
-            } else {
-                hm.put(x, hm.get(x) + 1);
+            Graph g = new Graph();
+            Vertex firstVertex = new Vertex(Integer.toString(0));
+            Vertex oldVertex = firstVertex;
+            Vertex newVertex = null;
+            g.addVertex(oldVertex);
+            for (int i = 1; i < numberOfVertices; i++) {
+                newVertex = new Vertex(Integer.toString(i));
+                g.addVertex(newVertex);
+                Edge edge = new Edge(oldVertex, newVertex);
+                g.addEdge(edge);
+                oldVertex = newVertex;
             }
+            if (newVertex != null) {
+                Edge edge = new Edge(newVertex, firstVertex);
+                g.addEdge(edge);
+            }
+            gif = new ConstantGameInstanceFactory(g, width, height);
         }
-        System.out.println(hm);
+
+        // play the matchup
+        Match match = new Match(player1, player2, gif, bestOutOf);
+        long startTime = System.nanoTime();
+        MatchResult mr = match.play();
+        long endTime = System.nanoTime();
+        System.out.println(mr.announceResult());
+        System.out.println("average game time: " + (endTime - startTime) / bestOutOf + "ms");
     }
 }

@@ -22,10 +22,6 @@ public class RandomPlayer implements Player {
      * A random number generator.
      */
     private Random r;
-    /**
-     * A random number generator.
-     */
-    private Random r;
 
     /**
      * Creates a random player with the assigned name.

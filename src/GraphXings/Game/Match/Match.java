@@ -1,4 +1,5 @@
 package GraphXings.Game.Match;
+
 import GraphXings.Algorithms.Player;
 import GraphXings.Game.Game;
 import GraphXings.Game.GameInstance.GameInstance;
@@ -8,8 +9,7 @@ import GraphXings.Game.GameResult;
 /**
  * A class managing a Best of X type match of GraphXings.
  */
-public class Match
-{
+public class Match {
 	/**
 	 * The first player.
 	 */
@@ -29,13 +29,13 @@ public class Match
 
 	/**
 	 * Constructs a match object.
-	 * @param player1 The first player.
-	 * @param player2 The second player.
-	 * @param factory The game instance factory to be used for created the games!
+	 * 
+	 * @param player1   The first player.
+	 * @param player2   The second player.
+	 * @param factory   The game instance factory to be used for created the games!
 	 * @param bestOutOf The number of games to be played.
 	 */
-	public Match(Player player1, Player player2, GameInstanceFactory factory, int bestOutOf)
-	{
+	public Match(Player player1, Player player2, GameInstanceFactory factory, int bestOutOf) {
 		this.player1 = player1;
 		this.player2 = player2;
 		this.bestOutOf = bestOutOf;
@@ -44,47 +44,39 @@ public class Match
 
 	/**
 	 * Plays the match.
+	 * 
 	 * @return A MatchResult object containing the results of the match.
 	 */
-	public MatchResult play()
-	{
+	public MatchResult play() {
 		boolean end = false;
 		int gamesWon1 = 0;
 		int gamesWon2 = 0;
 		int gamesPlayed = 0;
-		while(!end)
-		{
+		while (!end) {
+			System.out.println("Game " + (gamesPlayed + 1) + "/" + bestOutOf);
 			GameInstance gi = factory.getGameInstance();
-			Game game = new Game(gi.getG(),gi.getWidth(),gi.getHeight(),player1,player2);
+			Game game = new Game(gi.getG(), gi.getWidth(), gi.getHeight(), player1, player2);
 			GameResult gr = game.play();
 			gamesPlayed++;
-			if (gamesPlayed > 2*bestOutOf)
-			{
+			if (gamesPlayed > 2 * bestOutOf) {
 				end = true;
 			}
-			if (gr.getWinner() == null)
-			{
+			if (gr.getWinner() == null) {
 				continue;
-			}
-			else
-			{
+			} else {
 				int gamesWonWinner;
-				if (gr.getWinner().equals(player1))
-				{
+				if (gr.getWinner().equals(player1)) {
 					gamesWon1++;
 					gamesWonWinner = gamesWon1;
-				}
-				else
-				{
+				} else {
 					gamesWon2++;
 					gamesWonWinner = gamesWon2;
 				}
-				if (gamesWonWinner > bestOutOf/2)
-				{
+				if (gamesWonWinner > bestOutOf / 2) {
 					end = true;
 				}
 			}
 		}
-		return new MatchResult(player1,player2,gamesWon1,gamesWon2);
+		return new MatchResult(player1, player2, gamesWon1, gamesWon2);
 	}
 }
