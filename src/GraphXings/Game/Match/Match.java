@@ -26,6 +26,10 @@ public class Match
 	 * The number of games to be played.
 	 */
 	private int bestOutOf;
+	/**
+	 * The time limit for each game in the match.
+	 */
+	private long gameTimeLimit;
 
 	/**
 	 * Constructs a match object.
@@ -40,6 +44,24 @@ public class Match
 		this.player2 = player2;
 		this.bestOutOf = bestOutOf;
 		this.factory = factory;
+		this.gameTimeLimit = Long.MAX_VALUE;
+	}
+
+	/**
+	 * Constructs a match object.
+	 * @param player1 The first player.
+	 * @param player2 The second player.
+	 * @param factory The game instance factory to be used for created the games!
+	 * @param bestOutOf The number of games to be played.
+	 * @param gameTimeLimit The time limit for each game in the match.
+	 */
+	public Match(Player player1, Player player2, GameInstanceFactory factory, int bestOutOf, long gameTimeLimit)
+	{
+		this.player1 = player1;
+		this.player2 = player2;
+		this.bestOutOf = bestOutOf;
+		this.factory = factory;
+		this.gameTimeLimit = gameTimeLimit;
 	}
 
 	/**
@@ -55,9 +77,10 @@ public class Match
 		while(!end)
 		{
 			GameInstance gi = factory.getGameInstance();
-			Game game = new Game(gi.getG(),gi.getWidth(),gi.getHeight(),player1,player2);
+			Game game = new Game(gi.getG(),gi.getWidth(),gi.getHeight(),player1,player2,gameTimeLimit);
 			GameResult gr = game.play();
 			gamesPlayed++;
+			System.out.println("Game " + gamesPlayed + ": " + gr.announceResult());
 			if (gamesPlayed > 2*bestOutOf)
 			{
 				end = true;
