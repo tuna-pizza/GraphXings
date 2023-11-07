@@ -59,6 +59,8 @@ public class GameResult
         this.player2 = player2;
         this.cheatingPlayer1 = cheatingPlayer1;
         this.cheatingPlayer2 = cheatingPlayer2;
+        this.timeOutPlayer1 = timeOutPlayer1;
+        this.timeOutPlayer2 = timeOutPlayer2;
     }
 
     /**
