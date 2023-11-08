@@ -143,45 +143,25 @@ public class Game
     private int playRound(Player maximizer, Player minimizer) throws InvalidMoveException, TimeOutException
     {
         int turn = 0;
+        GameState gs = new GameState(width,height);
         LinkedList<GameMove> gameMoves = new LinkedList<>();
-        HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
-        HashSet<Vertex> placedVertices = new HashSet<>();
         long timeMaximizer = 0;
         long timeMinimizer = 0;
-        int[][] usedCoordinates = new int[width][height];
-        for (int x = 0; x < width; x++)
-        {
-            for (int y=0; y < height; y++)
-            {
-                usedCoordinates[x][y] = 0;
-            }
-        }
         while (turn < g.getN())
         {
             GameMove newMove;
             Graph copyOfG = g;
             LinkedList<GameMove> copyOfGameMoves = gameMoves;
-            HashMap<Vertex, Coordinate> copyOfVertexCoordinates = vertexCoordinates;
-            HashSet<Vertex> copyOfPlacedVertices = placedVertices;
-            int[][] copyOfUsedCoordinates = usedCoordinates;
-            if (safeMode)
-            {
-                copyOfG = g.copy();
-                copyOfGameMoves = copyGameMoves(gameMoves);
-                copyOfVertexCoordinates = copyVertexCoordinates(vertexCoordinates);
-                copyOfPlacedVertices = copyPlacedVertices(placedVertices);
-                copyOfUsedCoordinates = copyUsedCoordinates(usedCoordinates);
-            }
             if (turn%2 == 0)
             {
                 long moveStartTime = System.nanoTime();
-                newMove = maximizer.maximizeCrossings(copyOfG,copyOfVertexCoordinates,copyOfGameMoves,copyOfUsedCoordinates,copyOfPlacedVertices,width,height);
+                newMove = maximizer.maximizeCrossings(copyOfG,gs.getVertexCoordinates(),copyOfGameMoves,gs.getUsedCoordinates(),gs.getPlacedVertices(),width,height);
                 timeMaximizer += System.nanoTime()-moveStartTime;
                 if (timeMaximizer > timeLimit)
                 {
                     throw new TimeOutException(maximizer);
                 }
-                if (!checkMoveValidity(newMove,placedVertices,usedCoordinates))
+                if (!gs.checkMoveValidity(newMove))
                 {
                     throw new InvalidMoveException(maximizer);
                 }
@@ -189,117 +169,22 @@ public class Game
            else
            {
                long moveStartTime = System.nanoTime();
-               newMove = minimizer.minimizeCrossings(copyOfG,copyOfVertexCoordinates,copyOfGameMoves,copyOfUsedCoordinates,copyOfPlacedVertices,width,height);
+               newMove = minimizer.minimizeCrossings(copyOfG,gs.getVertexCoordinates(),copyOfGameMoves,gs.getUsedCoordinates(),gs.getPlacedVertices(),width,height);
                timeMinimizer += System.nanoTime()-moveStartTime;
                if (timeMinimizer > timeLimit)
                {
                    throw new TimeOutException(minimizer);
                }
-               if (!checkMoveValidity(newMove,placedVertices,usedCoordinates))
+               if (!gs.checkMoveValidity(newMove))
                {
                    throw new InvalidMoveException(minimizer);
                }
            }
            gameMoves.add(newMove);
-           usedCoordinates[newMove.getCoordinate().getX()][newMove.getCoordinate().getY()]=1;
-           placedVertices.add(newMove.getVertex());
-           vertexCoordinates.put(newMove.getVertex(), newMove.getCoordinate());
+           gs.applyMove(newMove);
            turn++;
         }
-        CrossingCalculator cc = new CrossingCalculator(g,vertexCoordinates);
+        CrossingCalculator cc = new CrossingCalculator(g,gs.getVertexCoordinates());
         return  cc.computeCrossingNumber();
-    }
-
-    /**
-     * Checks if a move is valid given the current state of the game.
-     * @param newMove The potential move to be performed.
-     * @param placedVertices The vertices that already are placed.
-     * @param usedCoordinates A 0-1-map of the coordinates. 1 indicates an already used coordinate.
-     * @return True if the move is valid, false if it is invalid.
-     */
-    private boolean checkMoveValidity(GameMove newMove, HashSet<Vertex> placedVertices, int[][] usedCoordinates)
-    {
-        if (newMove.getVertex() == null ||newMove.getCoordinate() == null)
-        {
-            return  false;
-        }
-        if (placedVertices.contains(newMove.getVertex()))
-        {
-            return false;
-        }
-        int x = newMove.getCoordinate().getX();
-        int y = newMove.getCoordinate().getY();
-        if (x >= width || y >= height)
-        {
-            return false;
-        }
-        if (usedCoordinates[x][y] != 0)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Creates a copy of the vertex coordinates.
-     * @param vertexCoordinates The original vertex coordinates.
-     * @return A copy of vertexCoordinates.
-     */
-    private HashMap<Vertex, Coordinate> copyVertexCoordinates(HashMap<Vertex, Coordinate> vertexCoordinates)
-    {
-        HashMap<Vertex, Coordinate> copy = new HashMap<>();
-        for (Vertex v : vertexCoordinates.keySet())
-        {
-            copy.put(v,vertexCoordinates.get(v));
-        }
-        return copy;
-    }
-
-    /**
-     * Creates a copy of the list of placed vertices.
-     * @param placedVertices The original list of placed vertices.
-     * @return A copy of placedVertices.
-     */
-    private HashSet<Vertex> copyPlacedVertices(HashSet<Vertex> placedVertices)
-    {
-        HashSet<Vertex> copy = new HashSet<>();
-        for (Vertex v : placedVertices)
-        {
-            copy.add(v);
-        }
-        return copy;
-    }
-
-    /**
-     * Returns a copy of the list of prior game moves.
-     * @param gameMoves The list of prior game moves.
-     * @return A copy of gameMoves.
-     */
-    private LinkedList<GameMove> copyGameMoves(List<GameMove> gameMoves)
-    {
-        LinkedList<GameMove> copy = new LinkedList<>();
-        for(int i=0; i < gameMoves.size(); i++)
-        {
-            copy.add(gameMoves.get(i));
-        }
-        return copy;
-    }
-
-    /**
-     * Returns a copy of the map of used coordinates.
-     * @param usedCoordinates The original map of used coordinates.
-     * @return A copy of usedCoordinates.
-     */
-    private int[][] copyUsedCoordinates(int[][] usedCoordinates)
-    {
-        int[][] copy = new int[usedCoordinates.length][usedCoordinates[0].length];
-        for (int i = 0; i < usedCoordinates.length; i++)
-        {
-            for (int j = 0; j < usedCoordinates[0].length; j++)
-            {
-                copy[i][j]=usedCoordinates[i][j];
-            }
-        }
-        return copy;
     }
 }
