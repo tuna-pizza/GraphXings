@@ -30,6 +30,14 @@ public class GameResult {
      * True if player two was caught cheating.
      */
     private boolean cheatingPlayer2;
+    /**
+     * True if player one ran out of time.
+     */
+    private boolean timeOutPlayer1;
+    /**
+     * True if player two ran out of time.
+     */
+    private boolean timeOutPlayer2;
 
     /**
      * Constructs a GameResult object for storing the results of a GraphXings game!
@@ -42,15 +50,19 @@ public class GameResult {
      *                        crossings in the second round.
      * @param cheatingPlayer1 True, if player 1 cheated, false otherwise.
      * @param cheatingPlayer2 True, if player 2 cheated, false otherwise.
+     * @param timeOutPlayer1  True, if player 1 ran out of time, false otherwise.
+     * @param timeOutPlayer2  True, if player 1 ran out of time, false otherwise.
      */
     public GameResult(int crossingsGame1, int crossingsGame2, Player player1, Player player2, boolean cheatingPlayer1,
-            boolean cheatingPlayer2) {
+            boolean cheatingPlayer2, boolean timeOutPlayer1, boolean timeOutPlayer2) {
         this.crossingsGame1 = crossingsGame1;
         this.crossingsGame2 = crossingsGame2;
         this.player1 = player1;
         this.player2 = player2;
         this.cheatingPlayer1 = cheatingPlayer1;
         this.cheatingPlayer2 = cheatingPlayer2;
+        this.timeOutPlayer1 = timeOutPlayer1;
+        this.timeOutPlayer2 = timeOutPlayer2;
     }
 
     /**
@@ -59,6 +71,12 @@ public class GameResult {
      * @return The winning player.
      */
     public Player getWinner() {
+        if (timeOutPlayer1) {
+            return player2;
+        }
+        if (timeOutPlayer2) {
+            return player1;
+        }
         if (cheatingPlayer1) {
             return player2;
         }
@@ -83,6 +101,12 @@ public class GameResult {
      * @return A string announcing the result of the GraphXings game!
      */
     public String announceResult() {
+        if (timeOutPlayer1) {
+            return (player1.getName() + " ran out of time. " + player2.getName() + " wins!");
+        }
+        if (timeOutPlayer2) {
+            return (player2.getName() + " ran out of time. " + player1.getName() + " wins!");
+        }
         if (cheatingPlayer1) {
             return (player1.getName() + " attempted an invalid move. " + player2.getName() + " wins!");
         }
