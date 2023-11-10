@@ -52,12 +52,19 @@ public class Match {
 		int gamesWon1 = 0;
 		int gamesWon2 = 0;
 		int gamesPlayed = 0;
+		long startTime = System.nanoTime();
+		// System.out.println("game numbers | create game | play | winner declaration");
+		// System.out.println("game | init p1 | init p2 | play");
+		System.out.println("init used to 0 | copy | player action | add");
 		while (!end) {
-			System.out.println("Game " + (gamesPlayed + 1) + "/" + bestOutOf);
+			System.out.print(gamesPlayed + 1);
+			long t1 = System.nanoTime();
 			GameInstance gi = factory.getGameInstance();
 			Game game = new Game(gi.getG(), gi.getWidth(), gi.getHeight(), player1, player2);
+			long t2 = System.nanoTime();
 			GameResult gr = game.play();
 			gamesPlayed++;
+			long t3 = System.nanoTime();
 			if (gamesPlayed > 2 * bestOutOf) {
 				end = true;
 			}
@@ -76,7 +83,12 @@ public class Match {
 					end = true;
 				}
 			}
+			// System.out.print((gamesPlayed + 1) + "/" + bestOutOf);
+			// System.out.print(" | " + (t2 - t1) / 1000000 + "ms");
+			// System.out.print(" | " + (t3 - t2) / 1000000 + "ms");
+			// System.out.println(" | " + (System.nanoTime() - t3) / 1000000 + "ms");
 		}
+		System.out.println("while loop: " + (System.nanoTime() - startTime) / 1000000 + "ms");
 		return new MatchResult(player1, player2, gamesWon1, gamesWon2);
 	}
 }

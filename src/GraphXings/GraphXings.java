@@ -10,15 +10,15 @@ import GraphXings.Game.GameInstance.GameInstanceFactory;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.Match.Match;
 import GraphXings.Game.Match.MatchResult;
-import GraphXings.NewFiles.BetterThanRandom;
+import GraphXings.NewFiles.BetterThanRandomPlayer;
 
 public class GraphXings {
     public static void main(String[] args) {
         // number of games
-        int bestOutOf = 1;
+        int bestOutOf = 100;
 
         // matchup
-        Player player1 = new BetterThanRandom("BetterThanRandom");
+        Player player1 = new BetterThanRandomPlayer("BetterThanRandom");
         Player player2 = new RandomPlayer("Random");
 
         // type of game (random cycle -> true or constant -> false)
@@ -29,9 +29,9 @@ public class GraphXings {
             gif = new RandomCycleFactory();
         } else {
             // generate the graph for the constant game
-            int numberOfVertices = 10000;
-            int width = 10000;
-            int height = 10000;
+            int numberOfVertices = 1000;
+            int width = 1000;
+            int height = 1000;
 
             Graph g = new Graph();
             Vertex firstVertex = new Vertex(Integer.toString(0));
@@ -58,6 +58,6 @@ public class GraphXings {
         MatchResult mr = match.play();
         long endTime = System.nanoTime();
         System.out.println(mr.announceResult());
-        System.out.println("average game time: " + (endTime - startTime) / bestOutOf + "ms");
+        System.out.println("average game time: " + (endTime - startTime) / 1000000 / bestOutOf + "ms");
     }
 }

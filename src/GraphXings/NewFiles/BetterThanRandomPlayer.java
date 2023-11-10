@@ -13,7 +13,7 @@ import GraphXings.Data.*;
 /**
  * A player that bruteforces the, hopefully, best solution
  */
-public class BetterThanRandom implements Player {
+public class BetterThanRandomPlayer implements Player {
     /**
      * The name of the Good palyer
      */
@@ -27,7 +27,7 @@ public class BetterThanRandom implements Player {
      * 
      * @param name
      */
-    public BetterThanRandom(String name) {
+    public BetterThanRandomPlayer(String name) {
         this.name = name;
     }
 
@@ -45,6 +45,7 @@ public class BetterThanRandom implements Player {
 
     public GameMove BruteForce(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
             int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, boolean maximize) {
+        // get the first vertex that is not yet placed in the game
         Vertex v = null;
         for (Vertex v_ : g.getVertices()) {
             if (!placedVertices.contains(v_)) {
@@ -52,7 +53,7 @@ public class BetterThanRandom implements Player {
                 break;
             }
         }
-        // System.out.println("Placing vertex: " + v.getId());
+
         // Number of crossings before we placed the vertex
         int bestCrossingsAddedByVertex = maximize ? -9999999 : 9999999;
         int bestSample = 0;
@@ -60,7 +61,7 @@ public class BetterThanRandom implements Player {
         ArrayList<Integer> xPositions = new ArrayList<Integer>();
         ArrayList<Integer> yPositions = new ArrayList<Integer>();
         Random random = new Random();
-        // Create sample set
+        // Create sample set of possible placing positions of the current vertex v
         for (int sample = 0; sample < sampleSize; sample++) {
             int x = random.nextInt(width);
             int y = random.nextInt(height);
@@ -72,7 +73,7 @@ public class BetterThanRandom implements Player {
             }
         }
 
-        // Find best position where we can place vertex
+        // Find best position (maximizing crossings) we can place vertex v at
         for (int sample = 0; sample < sampleSize; sample++) {
             if (usedCoordinates[xPositions.get(sample)][yPositions.get(sample)] != 0)
                 continue;
@@ -88,13 +89,13 @@ public class BetterThanRandom implements Player {
                 bestCrossingsAddedByVertex = crossingsAddedByVertex;
             }
         }
-        // System.out.println("Placing at: " + xPositions.get(bestSample) + ", " +
-        // yPositions.get(bestSample));
-        HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
+
         Coordinate coordinateToAdd = new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample));
+        HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
         vertexCoordinates_.put(v, coordinateToAdd);
         betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
-        return new GameMove(v, new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample)));
+
+        return new GameMove(v, coordinateToAdd);
     }
 
     @Override
