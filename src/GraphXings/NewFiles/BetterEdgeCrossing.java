@@ -128,14 +128,7 @@ public class BetterEdgeCrossing {
 
                     // (!) delete the neighbor from the search tree if we are finished sweeping over
                     // the edge
-                    if (vertexCoordinatePair.get(vertex).getX() > vertexCoordinatePair.get(neighbor).getX()) {
-                        binarySearchTree.remove(edge);
-                        break;
-                    }
-                    // TODO: what if x's are the same -> vertical edge?
-                    else if (vertexCoordinatePair.get(vertex).getX() == vertexCoordinatePair.get(neighbor).getX()) {
-                        System.out.println("what to do, what to do?");
-                    }
+                    binarySearchTree.remove(edge);
                 }
             }
         }

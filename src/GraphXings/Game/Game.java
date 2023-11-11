@@ -60,20 +60,12 @@ public class Game {
      */
     public GameResult play() {
         try {
-            long t1 = System.nanoTime();
             player1.initializeNextRound(g.copy(), width, height, Player.Role.MAX);
-            long t2 = System.nanoTime();
             player2.initializeNextRound(g.copy(), width, height, Player.Role.MIN);
-            long t3 = System.nanoTime();
             int crossingsGame1 = playRound(player1, player2);
-            long t4 = System.nanoTime();
             player1.initializeNextRound(g.copy(), width, height, Player.Role.MIN);
             player2.initializeNextRound(g.copy(), width, height, Player.Role.MAX);
             int crossingsGame2 = playRound(player2, player1);
-
-            // System.out.print(" | " + (t2 - t1) / 1000 + "");
-            // System.out.print(" | " + (t3 - t2) / 1000 + "");
-            // System.out.println(" | " + (t4 - t3) / 1000 + "");
 
             return new GameResult(crossingsGame1, crossingsGame2, player1, player2, false, false);
         } catch (InvalidMoveException ex) {
@@ -98,39 +90,22 @@ public class Game {
      */
     private int playRound(Player maximizer, Player minimizer) throws InvalidMoveException {
         int turn = 0;
-        long copyT = 0;
-        long maxT = 0;
-        long minT = 0;
         LinkedList<GameMove> gameMoves = new LinkedList<>();
         HashMap<Vertex, Coordinate> vertexCoordinates = new HashMap<>();
         HashSet<Vertex> placedVertices = new HashSet<>();
         int[][] usedCoordinates = new int[width][height];
-        long t1 = System.nanoTime();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 usedCoordinates[x][y] = 0;
             }
         }
-        long t2 = System.nanoTime();
         while (turn < g.getN()) {
-            long t3 = System.nanoTime();
             GameMove newMove;
             Graph copyOfG = g.copy();
             LinkedList<GameMove> copyOfGameMoves = copyGameMoves(gameMoves);
             HashMap<Vertex, Coordinate> copyOfVertexCoordinates = copyVertexCoordinates(vertexCoordinates);
             HashSet<Vertex> copyOfPlacedVertices = copyPlacedVertices(placedVertices);
             int[][] copyOfUsedCoordinates = copyUsedCoordinates(usedCoordinates);
-            long t4 = System.nanoTime();
-
-            // Printing the Map after each move
-            // System.out.println("-Turn:" + turn + "-");
-            // for (int i = 0; i < copyOfUsedCoordinates.length; i++) {
-            // for (int j = 0; j < copyOfUsedCoordinates[i].length; j++) {
-            // System.out.print(copyOfUsedCoordinates[i][j] + " ");
-            // }
-            // System.out.println();
-            //
-            // }
 
             if (turn % 2 == 0) {
                 newMove = maximizer.maximizeCrossings(copyOfG, copyOfVertexCoordinates, copyOfGameMoves,
@@ -145,36 +120,13 @@ public class Game {
                     throw new InvalidMoveException(minimizer);
                 }
             }
-            long t5 = System.nanoTime();
             gameMoves.add(newMove);
             usedCoordinates[newMove.getCoordinate().getX()][newMove.getCoordinate().getY()] = 1;
             placedVertices.add(newMove.getVertex());
             vertexCoordinates.put(newMove.getVertex(), newMove.getCoordinate());
             turn++;
-            long t6 = System.nanoTime();
-
-            copyT += t4 - t3;
-            if (turn % 2 == 0) {
-                maxT += t5 - t4;
-            } else {
-                minT += t5 - t4;
-            }
-            // System.out.print(" | " + (t4 - t3) / 1000 + "");
-            // System.out.print(" | " + (turn % 2 == 0 ? "max " : "min ") + (t5 - t4) / 1000
-            // + "");
-            // System.out.println(" | " + (t6 - t5) / 1000 + "");
         }
-        long t7 = System.nanoTime();
         CrossingCalculator cc = new CrossingCalculator(g, vertexCoordinates);
-
-        System.out.println("preparation: " + (t2 - t1) / 1000 + "");
-        System.out.println("all: " + (t7 - t2) / 1000 + "");
-        System.out.println(
-                "(in micro seconds average per turn): copyTime "
-                        + copyT / g.getN() / 1000 + " | maximizingTime "
-                        + maxT / g.getN() / 1000
-                        + " | minimizingTime " + minT / g.getN() / 1000);
-
         return cc.computeCrossingNumber();
     }
 
