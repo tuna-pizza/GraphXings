@@ -59,6 +59,6 @@ public class GraphXings {
         MatchResult mr = match.play();
         long endTime = System.nanoTime();
         System.out.println(mr.announceResult());
-        System.out.println("average game time: " + (endTime - startTime) / 1000000 / bestOutOf + "ms");
+        System.out.println("average game time: " + (endTime - startTime) / bestOutOf / 1000000 + "ms");
     }
 }
