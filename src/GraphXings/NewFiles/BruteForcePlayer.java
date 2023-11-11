@@ -13,7 +13,7 @@ import GraphXings.Data.*;
 /**
  * A player that bruteforces the, hopefully, best solution
  */
-public class BetterThanRandomPlayer implements Player {
+public class BruteForcePlayer implements Player {
     /**
      * The name of the Good palyer
      */
@@ -27,7 +27,7 @@ public class BetterThanRandomPlayer implements Player {
      * 
      * @param name
      */
-    public BetterThanRandomPlayer(String name) {
+    public BruteForcePlayer(String name) {
         this.name = name;
     }
 
