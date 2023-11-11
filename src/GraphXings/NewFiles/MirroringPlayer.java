@@ -5,7 +5,6 @@ import GraphXings.Data.Coordinate;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
-import GraphXings.Game.Game;
 import GraphXings.Game.GameMove;
 
 import java.util.HashMap;
@@ -13,8 +12,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
-import javax.swing.text.html.HTMLDocument.Iterator;
 
 import java.lang.Math;
 

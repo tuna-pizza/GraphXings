@@ -1,13 +1,12 @@
 package GraphXings.NewFiles;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 
 import GraphXings.Game.GameMove;
-import GraphXings.Algorithms.Player;
+import GraphXings.Game.GameState;
+import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.*;
 
 /**
@@ -18,8 +17,29 @@ public class NewBruteForcePlayer implements NewPlayer {
      * The name of the Good palyer
      */
     private String name;
+    /**
+     * The graph to be drawn.
+     */
+    private Graph g;
+    /**
+     * The current state of the game;
+     */
+    private GameState gs;
+    /**
+     * The width of the game board.
+     */
+    private int width;
+    /**
+     * The height of the game board.
+     */
+    private int height;
+    /**
+     * The Edge Crossing algorithm to be applied
+     */
     private BetterEdgeCrossing betterEdgeCrossing = new BetterEdgeCrossing();
-
+    /**
+     * The sample size of the brute force method
+     */
     private int sampleSize = 10;
 
     /**
@@ -32,23 +52,20 @@ public class NewBruteForcePlayer implements NewPlayer {
     }
 
     @Override
-    public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
-            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        return BruteForce(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, true);
+    public GameMove maximizeCrossings(GameMove lastMove) {
+        return BruteForce(true);
     }
 
     @Override
-    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
-            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        return BruteForce(g, vertexCoordinates, gameMoves, usedCoordinates, placedVertices, width, height, false);
+    public GameMove minimizeCrossings(GameMove lastMove) {
+        return BruteForce(false);
     }
 
-    public GameMove BruteForce(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
-            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height, boolean maximize) {
+    public GameMove BruteForce(boolean maximize) {
         // get the first vertex that is not yet placed in the game
         Vertex v = null;
         for (Vertex v_ : g.getVertices()) {
-            if (!placedVertices.contains(v_)) {
+            if (!gs.getPlacedVertices().contains(v_)) {
                 v = v_;
                 break;
             }
@@ -65,7 +82,7 @@ public class NewBruteForcePlayer implements NewPlayer {
         for (int sample = 0; sample < sampleSize; sample++) {
             int x = random.nextInt(width);
             int y = random.nextInt(height);
-            if (usedCoordinates[x][y] != 0) { // The random coordinate is already taken
+            if (gs.getUsedCoordinates()[x][y] != 0) { // The random coordinate is already taken
                 sample--;
             } else {
                 xPositions.add(x);
@@ -75,9 +92,9 @@ public class NewBruteForcePlayer implements NewPlayer {
 
         // Find best position (maximizing crossings) we can place vertex v at
         for (int sample = 0; sample < sampleSize; sample++) {
-            if (usedCoordinates[xPositions.get(sample)][yPositions.get(sample)] != 0)
+            if (gs.getUsedCoordinates()[xPositions.get(sample)][yPositions.get(sample)] != 0)
                 continue;
-            HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
+            HashMap<Vertex, Coordinate> vertexCoordinates_ = gs.getVertexCoordinates();
             Coordinate coordinateToAdd = new Coordinate(xPositions.get(sample), yPositions.get(sample));
             vertexCoordinates_.put(v, coordinateToAdd);
             betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
@@ -91,7 +108,7 @@ public class NewBruteForcePlayer implements NewPlayer {
         }
 
         Coordinate coordinateToAdd = new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample));
-        HashMap<Vertex, Coordinate> vertexCoordinates_ = vertexCoordinates;
+        HashMap<Vertex, Coordinate> vertexCoordinates_ = gs.getVertexCoordinates();
         vertexCoordinates_.put(v, coordinateToAdd);
         betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
 
@@ -100,7 +117,12 @@ public class NewBruteForcePlayer implements NewPlayer {
 
     @Override
     public void initializeNextRound(Graph g, int width, int height, Role role) {
-        betterEdgeCrossing = new BetterEdgeCrossing();
+        // Store graph, width, height and create a new GameState.
+        this.g = g;
+        this.width = width;
+        this.height = height;
+        this.gs = new GameState(width, height);
+        this.betterEdgeCrossing = new BetterEdgeCrossing();
     }
 
     @Override
