@@ -17,6 +17,10 @@ public class NewMirroringPlayer implements NewPlayer {
      */
     private String name;
     /**
+     * A random number generator.
+     */
+    private Random r;
+    /**
      * The graph to be drawn.
      */
     private Graph g;
@@ -40,6 +44,7 @@ public class NewMirroringPlayer implements NewPlayer {
      */
     public NewMirroringPlayer(String name) {
         this.name = name;
+        this.r = new Random(name.hashCode());
     }
 
     public double myRound(double val) {
@@ -51,6 +56,33 @@ public class NewMirroringPlayer implements NewPlayer {
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
+        // First: Apply the last move by the opponent.
+        if (lastMove != null) {
+            gs.applyMove(lastMove);
+        }
+        // Second: Compute the new move.
+        GameMove newMove = getMaximizingMove(lastMove);
+        // Third: Apply the new move to the local GameState.
+        gs.applyMove(newMove);
+        // Finally: Return the new move.
+        return newMove;
+    }
+
+    @Override
+    public GameMove minimizeCrossings(GameMove lastMove) {
+        // First: Apply the last move by the opponent.
+        if (lastMove != null) {
+            gs.applyMove(lastMove);
+        }
+        // Second: Compute the new move.
+        GameMove newMove = getMinimizingMove(lastMove);
+        // Third: Apply the new move to the local GameState.
+        gs.applyMove(newMove);
+        // Finally: Return the new move.
+        return newMove;
+    }
+
+    public GameMove getMaximizingMove(GameMove lastMove) {
         // place it as far away as possible (mirrored around center point)
 
         // get random move to start from
@@ -153,8 +185,7 @@ public class NewMirroringPlayer implements NewPlayer {
         return randomMove();
     }
 
-    @Override
-    public GameMove minimizeCrossings(GameMove lastMove) {
+    public GameMove getMinimizingMove(GameMove lastMove) {
         // get the neighbor vertex
         LinkedList<Vertex> neighbors = null;
         Vertex current = lastMove.getVertex();
@@ -207,7 +238,6 @@ public class NewMirroringPlayer implements NewPlayer {
      * @return A random valid move.
      */
     private GameMove randomMove() {
-        Random r = new Random();
         int stillToBePlaced = g.getN() - gs.getPlacedVertices().size();
         int next = r.nextInt(stillToBePlaced);
         int skipped = 0;
@@ -222,7 +252,7 @@ public class NewMirroringPlayer implements NewPlayer {
                 break;
             }
         }
-        Coordinate c = new Coordinate(0, 0);
+        Coordinate c;
         do {
             c = new Coordinate(r.nextInt(width), r.nextInt(height));
         } while (gs.getUsedCoordinates()[c.getX()][c.getY()] != 0);

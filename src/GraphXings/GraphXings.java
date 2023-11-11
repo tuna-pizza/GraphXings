@@ -1,5 +1,7 @@
 package GraphXings;
 
+import GraphXings.Algorithms.NewPlayer;
+import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Algorithms.Player;
 import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
@@ -10,9 +12,14 @@ import GraphXings.Game.GameInstance.GameInstanceFactory;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.Match.Match;
 import GraphXings.Game.Match.MatchResult;
-import GraphXings.NewFiles.MirroringPlayer;
+import GraphXings.Game.Match.NewMatch;
+import GraphXings.Game.Match.NewMatchResult;
 import GraphXings.NewFiles.BruteForcePlayer;
+import GraphXings.NewFiles.MirroringPlayer;
 import GraphXings.NewFiles.MixingPlayer;
+import GraphXings.NewFiles.NewBruteForcePlayer;
+import GraphXings.NewFiles.NewMirroringPlayer;
+import GraphXings.NewFiles.NewMixingPlayer;
 
 public class GraphXings {
     public static void main(String[] args) {
@@ -20,8 +27,11 @@ public class GraphXings {
         int bestOutOf = 100;
 
         // matchup
-        Player player1 = new MixingPlayer("MixingPlayer");
-        Player player2 = new BruteForcePlayer("BruteForcePlayer");
+        NewPlayer strategy1 = new NewBruteForcePlayer("NewBruteForcePlayer");
+        NewPlayer strategy2 = new NewMirroringPlayer("NewMirroringPlayer");
+        int percentage = 10;
+        NewPlayer player1 = new NewMixingPlayer("NewMixingPlayer", strategy1, strategy2, percentage);
+        NewPlayer player2 = new NewRandomPlayer("NewRandomPlayer");
 
         // type of game (random cycle -> true or constant -> false)
         boolean cycleFactory = false;
@@ -55,9 +65,9 @@ public class GraphXings {
         }
 
         // play the matchup
-        Match match = new Match(player1, player2, gif, bestOutOf);
+        NewMatch match = new NewMatch(player1, player2, gif, bestOutOf);
         long startTime = System.nanoTime();
-        MatchResult mr = match.play();
+        NewMatchResult mr = match.play();
         long endTime = System.nanoTime();
         System.out.println(mr.announceResult());
         System.out.println("average game time: " + (endTime - startTime) / bestOutOf / 1000000 + "ms");

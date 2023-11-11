@@ -36,11 +36,11 @@ public class NewBruteForcePlayer implements NewPlayer {
     /**
      * The Edge Crossing algorithm to be applied
      */
-    private BetterEdgeCrossing betterEdgeCrossing = new BetterEdgeCrossing();
+    private BetterEdgeCrossing betterEdgeCrossing;
     /**
      * The sample size of the brute force method
      */
-    private int sampleSize = 10;
+    private int sampleSize;
 
     /**
      * Creates the good player with the assigned name.
@@ -49,16 +49,35 @@ public class NewBruteForcePlayer implements NewPlayer {
      */
     public NewBruteForcePlayer(String name) {
         this.name = name;
+        this.sampleSize = 10;
     }
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
-        return BruteForce(true);
+        // First: Apply the last move by the opponent.
+        if (lastMove != null) {
+            gs.applyMove(lastMove);
+        }
+        // Second: Compute the new move.
+        GameMove newMove = BruteForce(true);
+        // Third: Apply the new move to the local GameState.
+        gs.applyMove(newMove);
+        // Finally: Return the new move.
+        return newMove;
     }
 
     @Override
     public GameMove minimizeCrossings(GameMove lastMove) {
-        return BruteForce(false);
+        // First: Apply the last move by the opponent.
+        if (lastMove != null) {
+            gs.applyMove(lastMove);
+        }
+        // Second: Compute the new move.
+        GameMove newMove = BruteForce(false);
+        // Third: Apply the new move to the local GameState.
+        gs.applyMove(newMove);
+        // Finally: Return the new move.
+        return newMove;
     }
 
     public GameMove BruteForce(boolean maximize) {
