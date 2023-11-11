@@ -1,0 +1,46 @@
+import GraphXings.Game.GameMove;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
+
+import java.lang.Math;
+
+/**
+ * A player performing random moves.
+ */
+public class MixingPlayer implements NewPlayer {
+    /**
+     * The name of the player.
+     */
+    private String name;
+
+    /**
+     * The strategies of the player
+     */
+    private Player strategy1;
+    private Player strategy2;
+
+    /**
+     * Creates a player with the assigned name.
+     * that mixes two strategies
+     * 
+     * @param name
+     */
+    public MixingPlayer(String name) {
+        this.name = name;
+    }
+
+    public String.getStrategies() {
+        return "mixing " strategy1.name + " and " + strategy2.name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+}

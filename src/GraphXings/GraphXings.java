@@ -12,6 +12,7 @@ import GraphXings.Game.Match.Match;
 import GraphXings.Game.Match.MatchResult;
 import GraphXings.NewFiles.MirroringPlayer;
 import GraphXings.NewFiles.BruteForcePlayer;
+import GraphXings.NewFiles.MixingPlayer;
 
 public class GraphXings {
     public static void main(String[] args) {
@@ -19,8 +20,8 @@ public class GraphXings {
         int bestOutOf = 100;
 
         // matchup
-        Player player1 = new BruteForcePlayer("BetterThanRandom");
-        Player player2 = new RandomPlayer("Random");
+        Player player1 = new MixingPlayer("MixingPlayer");
+        Player player2 = new BruteForcePlayer("BruteForcePlayer");
 
         // type of game (random cycle -> true or constant -> false)
         boolean cycleFactory = false;
