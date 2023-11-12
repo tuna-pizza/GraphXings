@@ -55,7 +55,7 @@ public class NewMixingPlayer implements NewPlayer {
      * The percentage value with which to choose brute force over the mirror tactic
      */
     private int percentage;
-    private GameMove lastMove = null;
+    private GameMove lastOwnMove = null;
     private HashMap<String, Vertex> mappedVertecies = new HashMap<String, Vertex>();
 
     /**
@@ -74,7 +74,7 @@ public class NewMixingPlayer implements NewPlayer {
         this.r = new Random(name.hashCode());
         this.sampleSize = 10;
         this.percentage = 50;
-        this.strategy = Strategy.BruteForce;
+        this.strategy = Strategy.Annealing;
     }
 
     @Override
@@ -219,7 +219,7 @@ public class NewMixingPlayer implements NewPlayer {
 
             return new GameMove(v, coordinateToAdd);
         } else {
-            return betterMinimizer(lastMove);
+            return betterMinimizer();
         }
     }
 
@@ -295,7 +295,7 @@ public class NewMixingPlayer implements NewPlayer {
             // else return the random move
             return rm;
         } else {
-            return betterMinimizer(lastMove);
+            return betterMinimizer();
             // // get the neighbor vertex
             // ArrayList<Vertex> neighbors = null;
             //
@@ -447,17 +447,17 @@ public class NewMixingPlayer implements NewPlayer {
         BruteForce, Mirroring, Percentage, Annealing, AnnealingReverse
     };
 
-    public GameMove betterMinimizer(GameMove lastMove) {
+    public GameMove betterMinimizer() {
         Vertex vertexToPlace;
         GameMove newMove = null;
-        if (lastMove != null) {
-            LinkedList<Vertex> unplacedNeighbors = getUnplacedNeighbors(lastMove.getVertex());
+        if (lastOwnMove != null) {
+            LinkedList<Vertex> unplacedNeighbors = getUnplacedNeighbors(lastOwnMove.getVertex());
 
             if (unplacedNeighbors.size() != 0) {
                 vertexToPlace = unplacedNeighbors.getLast();
 
-                int lastX = lastMove.getCoordinate().getX();
-                int lastY = lastMove.getCoordinate().getY();
+                int lastX = lastOwnMove.getCoordinate().getX();
+                int lastY = lastOwnMove.getCoordinate().getY();
                 if (lastX < lastY) {// Bottom left area
                     if (height - lastY < lastX) {// Bottom row
                         while (true) {
@@ -585,10 +585,10 @@ public class NewMixingPlayer implements NewPlayer {
         }
         // TODO: why does it throw here anyway?
         if (newMove != null && gs.checkMoveValidity(newMove)) {
-            lastMove = newMove;
+            lastOwnMove = newMove;
             return newMove;
         }
-        lastMove = null; // Found no easy move, do some random stuff and try again
+        lastOwnMove = null; // Found no easy move, do some random stuff and try again
         return BruteForce(false);
     }
 

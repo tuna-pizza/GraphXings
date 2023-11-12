@@ -42,8 +42,8 @@ public class GraphXings {
         } else {
             // generate the graph for the constant game
             int numberOfVertices = 100;
-            int width = 1000;
-            int height = 1000;
+            int width = 10000;
+            int height = 10000;
 
             Graph g = new Graph();
             Vertex firstVertex = new Vertex(Integer.toString(0));
