@@ -4,8 +4,6 @@ import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Graph;
 
-import java.util.LinkedList;
-
 /**
  * A class for managing a game of GraphXings!
  */
@@ -34,24 +32,6 @@ public class NewGame {
 	 * The time limit for players.
 	 */
 	private long timeLimit;
-
-	/**
-	 * Instantiates a game of GraphXings.
-	 * 
-	 * @param g       The graph to be drawn.
-	 * @param width   The width of the game board.
-	 * @param height  The height of the game board.
-	 * @param player1 The first player. Plays as the maximizer in round one.
-	 * @param player2 The second player. Plays as the minimizer in round one.
-	 */
-	public NewGame(Graph g, int width, int height, NewPlayer player1, NewPlayer player2) {
-		this.g = g;
-		this.width = width;
-		this.height = height;
-		this.player1 = player1;
-		this.player2 = player2;
-		this.timeLimit = Long.MAX_VALUE;
-	}
 
 	/**
 	 * Instantiates a game of GraphXings.

@@ -2,15 +2,11 @@ package GraphXings.NewFiles;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import GraphXings.Algorithms.NewPlayer;
-import GraphXings.Game.Game;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
 import GraphXings.Data.*;
@@ -54,9 +50,20 @@ public class NewMixingPlayer implements NewPlayer {
     /**
      * The percentage value with which to choose brute force over the mirror tactic
      */
-    private int percentage;
+    // TODO: the larger the field and number of vertices, the higher the percentage
+    // for mirroring game (e.g. annealing)
+    // TODO: make it so that this is calculated: percentage =
+    // duration(BruteForceMove) / duration(MirroringMove)
+    // TODO: alternatively: change the sample size of the brute force player part
+    private double percentage;
+    /**
+     * The last move made by this player
+     */
     private GameMove lastOwnMove = null;
-    private HashMap<String, Vertex> mappedVertecies = new HashMap<String, Vertex>();
+    /**
+     * The id of a vertex mapped to its vertex object
+     */
+    private HashMap<String, Vertex> mapIdToVertex = new HashMap<String, Vertex>();
 
     /**
      * The strategy used
@@ -69,389 +76,82 @@ public class NewMixingPlayer implements NewPlayer {
      * 
      * @param name
      */
-    public NewMixingPlayer(String name, NewPlayer strategy1, NewPlayer strategy2, int percentage) {
+    public NewMixingPlayer(String name, int sampleSize, double percentage, Strategy strategy) {
         this.name = name;
+        this.sampleSize = sampleSize;
+        this.percentage = percentage;
+        this.strategy = strategy;
         this.r = new Random(name.hashCode());
-        this.sampleSize = 10;
-        this.percentage = 50;
-        this.strategy = Strategy.Annealing;
     }
 
     @Override
     public GameMove maximizeCrossings(GameMove lastMove) {
-        // First: Apply the last move by the opponent.
-        if (lastMove != null) {
-            gs.applyMove(lastMove);
-        }
-        // Second: Compute the new move.
-        GameMove newMove = getMaximizingMove(lastMove);
-        // Third: Apply the new move to the local GameState.
-        gs.applyMove(newMove);
-        // Finally: Return the new move.
-        return newMove;
-    }
-
-    public GameMove getMaximizingMove(GameMove lastMove) {
-        switch (strategy) {
-            case BruteForce:
-                return getBruteForceMove(true);
-            case Mirroring:
-                return getMirroringMove(lastMove, true);
-            case Percentage:
-                if (r.nextInt(100) < percentage) {
-                    return getBruteForceMove(true);
-                } else {
-                    return getMirroringMove(lastMove, true);
-                }
-            case Annealing:
-                if (gs.getPlacedVertices().size() < percentage) {
-                    return getMirroringMove(lastMove, true);
-                } else {
-                    return getBruteForceMove(true);
-                }
-            case AnnealingReverse:
-                if (gs.getPlacedVertices().size() < percentage) {
-                    return getBruteForceMove(true);
-                } else {
-                    return getMirroringMove(lastMove, true);
-                }
-            default:
-                return getRandomMove();
-        }
+        return makeMove(lastMove, true);
     }
 
     @Override
     public GameMove minimizeCrossings(GameMove lastMove) {
-        // First: Apply the last move by the opponent.
+        return makeMove(lastMove, false);
+    }
+
+    public GameMove makeMove(GameMove lastMove, boolean maximize) {
+        // First: Apply the last move by the opponent to the local GameState (and the
+        // Crossing Calculator)
         if (lastMove != null) {
             gs.applyMove(lastMove);
+            betterEdgeCrossing.insertVertexByCoordinate(lastMove.getVertex(), gs.getVertexCoordinates());
         }
         // Second: Compute the new move.
         GameMove newMove;
-        newMove = getMinimizingMove(lastMove);
-        // Third: Apply the new move to the local GameState.
+        newMove = getMove(lastMove, maximize);
+        // Third: Apply the new move to the local GameState (and the Crossing
+        // Calculator)
         gs.applyMove(newMove);
+        betterEdgeCrossing.insertVertexByCoordinate(newMove.getVertex(), gs.getVertexCoordinates());
         // Finally: Return the new move.
         return newMove;
     }
 
-    public GameMove getMinimizingMove(GameMove lastMove) {
-        switch (strategy) {
-            case BruteForce:
-                return getBruteForceMove(false);
-            case Mirroring:
-                return getMirroringMove(lastMove, false);
-            case Percentage:
-                if (r.nextInt(100) < percentage) {
-                    return getBruteForceMove(false);
-                } else {
-                    return getMirroringMove(lastMove, false);
-                }
-            case Annealing:
-                if (gs.getPlacedVertices().size() < percentage) {
-                    return getMirroringMove(lastMove, false);
-                } else {
-                    return getBruteForceMove(false);
-                }
-            case AnnealingReverse:
-                if (gs.getPlacedVertices().size() < percentage) {
-                    return getBruteForceMove(false);
-                } else {
-                    return getMirroringMove(lastMove, false);
-                }
-            default:
-                return getRandomMove();
-        }
-    }
-
-    public GameMove getBruteForceMove(boolean maximize) {
+    public GameMove getMove(GameMove lastMove, boolean maximize) {
         if (maximize) {
-            // get the first vertex that is not yet placed in the game
-            Vertex v = null;
-            for (Vertex v_ : g.getVertices()) {
-                if (!gs.getPlacedVertices().contains(v_)) {
-                    v = v_;
-                    break;
-                }
+            // double progress = (double) gs.getPlacedVertices().size() / g.getN();
+            // System.out.println(progress);
+            switch (strategy) {
+                case BruteForce:
+                    return getBruteForceMove(maximize);
+                case Mirroring:
+                    return getMirroringMove(lastMove);
+                case Percentage:
+                    if (r.nextDouble() < percentage) {
+                        return getBruteForceMove(maximize);
+                    } else {
+                        return getMirroringMove(lastMove);
+                    }
+                case Annealing:
+                    if ((double) gs.getPlacedVertices().size() / g.getN() < percentage) {
+                        return getMirroringMove(lastMove);
+                    } else {
+                        return getBruteForceMove(maximize);
+                    }
+                case AnnealingReverse:
+                    if (gs.getPlacedVertices().size() < percentage) {
+                        return getBruteForceMove(maximize);
+                    } else {
+                        return getMirroringMove(lastMove);
+                    }
+                default:
+                    return getRandomMove();
             }
-
-            // Number of crossings before we placed the vertex
-            int bestCrossingsAddedByVertex = maximize ? -9999999 : 9999999;
-            int bestSample = 0;
-
-            ArrayList<Integer> xPositions = new ArrayList<Integer>();
-            ArrayList<Integer> yPositions = new ArrayList<Integer>();
-            Random random = new Random();
-            // Create sample set of possible placing positions of the current vertex v
-            for (int sample = 0; sample < sampleSize; sample++) {
-                int x = random.nextInt(width);
-                int y = random.nextInt(height);
-                if (gs.getUsedCoordinates()[x][y] != 0) { // The random coordinate is already taken
-                    sample--;
-                } else {
-                    xPositions.add(x);
-                    yPositions.add(y);
-                }
-            }
-
-            // Find best position (maximizing crossings) we can place vertex v at
-            for (int sample = 0; sample < sampleSize; sample++) {
-                if (gs.getUsedCoordinates()[xPositions.get(sample)][yPositions.get(sample)] != 0)
-                    continue;
-                HashMap<Vertex, Coordinate> vertexCoordinates_ = gs.getVertexCoordinates();
-                Coordinate coordinateToAdd = new Coordinate(xPositions.get(sample), yPositions.get(sample));
-                vertexCoordinates_.put(v, coordinateToAdd);
-                betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
-                int crossingsAddedByVertex = betterEdgeCrossing.calculateIntersections(g.getEdges(),
-                        vertexCoordinates_);
-                betterEdgeCrossing.removeCoordinate(v);
-                if (maximize ? crossingsAddedByVertex > bestCrossingsAddedByVertex
-                        : crossingsAddedByVertex < bestCrossingsAddedByVertex) {
-                    bestSample = sample;
-                    bestCrossingsAddedByVertex = crossingsAddedByVertex;
-                }
-            }
-
-            Coordinate coordinateToAdd = new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample));
-            HashMap<Vertex, Coordinate> vertexCoordinates_ = gs.getVertexCoordinates();
-            vertexCoordinates_.put(v, coordinateToAdd);
-            betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
-
-            return new GameMove(v, coordinateToAdd);
         } else {
-            return betterMinimizer();
+            return getMinimizingMove();
         }
     }
 
-    public GameMove getMirroringMove(GameMove lastMove, boolean maximize) {
-        if (maximize) {
-            // place it mirrored around center point
-            // on the circle/ellipsis that is halfway between center and border
-            // (1/4 and 3/4 height or width)
-
-            // as good as any other, to the right from center
-            if (lastMove == null) {
-                return new GameMove(new Vertex("0"), new Coordinate(3 * width / 4, 0));
-            }
-
-            GameMove rm = getRandomMove();
-            Vertex v = rm.getVertex();
-            ArrayList<Vertex> neighbors = getNeighbors(v);
-            // TODO: get a good vertex
-            // get a good vertex, either one with 2 or 3 fixed neighbors or one that might
-            // enable such a 2, 3 fixed one for oneself not the enemy don't enable the enemy
-            // by fixing a second or third neighbor
-            // Vertex v = getGoodVertex();
-            // TODO: or: choose the best neighbor from the last move with the isSet variable
-            // get neighbors of last move, get the best of those
-            // ArrayList<Vertex> neighbors = getNeighbors(lastMove.getVertex());
-            // List<Boolean> isSet = neighbors.stream().map(neighbor ->
-            // gs.getPlacedVertices().contains(neighbor))
-            // .collect(Collectors.toList());
-            Vertex next = neighbors.get(0);
-            Vertex prev = neighbors.get(1);
-
-            // check if one of the neighbors was placed already
-            Vertex neighbor = null;
-            boolean r = gs.getPlacedVertices().contains(next);
-            boolean t = gs.getPlacedVertices().contains(prev);
-            if (!r && !t) {
-                return getRandomMove();
-                // } else if (r && t) { // maximize both neighbors if both are set (later in
-                // game)
-                // // TODO: do the brute force maximizing here!!!
-                // return rm;
-            } else { // mirror around the center if only one is given
-                neighbor = r ? next : prev;
-                int x = gs.getVertexCoordinates().get(neighbor).getX();
-                int y = gs.getVertexCoordinates().get(neighbor).getY();
-                int ix = width - 1 - x;
-                int iy = height - 1 - y;
-                // mirror around the center
-                if (gs.getUsedCoordinates()[ix][iy] == 0) {
-                    return new GameMove(v, new Coordinate(ix, iy));
-                }
-                // if taken, take one further away
-                double deltaX = ix - x;
-                double deltaY = iy - y;
-                double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                deltaX /= length;
-                deltaY /= length;
-                int curr = 1;
-                while (true) {
-                    // check diagonal point away from original (making it longer)
-                    int a = ix + (int) myRound(curr * deltaX);
-                    int b = iy + (int) myRound(curr * deltaY);
-                    if (a < 0 || a >= width || b < 0 || b >= height) {
-                        break;
-                    }
-                    if (gs.getUsedCoordinates()[a][b] == 0) {
-                        return new GameMove(v, new Coordinate(a, b));
-                    }
-                    // else get further away
-                    curr++;
-                }
-            }
-            // else return the random move
-            return rm;
-        } else {
-            return betterMinimizer();
-            // // get the neighbor vertex
-            // ArrayList<Vertex> neighbors = null;
-            //
-            //
-            // neighbors = getNeighbors(current);
-            //
-            //
-            // Vertex prev = neighbors.get(1);
-            // neighbors = getNeighbors(next);
-            // Vertex nextnext = current.equals(neighbors.get(0)) ? neighbors.get(1) :
-            // neighbors.get(0);
-            // neighbors = getNeighbors(prev);
-            //
-            // Vertex prevprev = current.equals(neighbors.get(0)) ? neighbors.get(1) :
-            // neighbors.get(0);
-            // Vertex neighbor = null;
-            //
-            //
-
-            // boolean t = gs.getPlacedVertices().contains(prev);
-            //
-            //
-            // boolean u = gs.getPlacedVertices().contains(prevprev);
-            //
-            //
-            // // if possible
-            //
-            // hbor = z ? next : (u ? prev : next);
-            // f (!r) { // check if next neighbor (id+1) can be placed next to the current
-            // vertex
-            // hbor = next;
-            //
-            // se if (!t) { // check if previous neighbor (id-1) can be placed next to the
-            // current vertex
-            // hbor = prev;
-            //
-            // // if both are set
-            // f (!z) {
-            // current = next;
-            // neighbor = nextnext;
-            // } else if (!u) {
-            // current = prev;
-            // neighbor = prevprev;
-            // se {
-            // return getRandomMove();
-            //
-            //
-
-            // return getNeighborMove(current, neighbor);
-        }
-    }
-
-    public GameMove getNeighborMove(Vertex current, Vertex neighbor) {
-        int x = gs.getVertexCoordinates().get(current).getX();
-        int y = gs.getVertexCoordinates().get(current).getY();
-        int neighborhood = 3;
-        for (int i = 1; i < neighborhood; i++) {
-            for (int j = -i; j <= i; j++) {
-                if ((x + j) >= 0 && (x + j) < width) {
-                    for (int k = -i; k <= i; k++) {
-                        if (Math.abs(j) == i || Math.abs(k) == i) {
-                            if ((y + k) >= 0 && (y + k) < height) {
-                                if (gs.getUsedCoordinates()[x + j][y + k] == 0) {
-                                    return new GameMove(neighbor, new Coordinate(x + j, y + k));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return getRandomMove();
-    }
-
-    /**
-     * Computes a random valid move.
-     * 
-     * @return A random valid move.
-     */
-    private GameMove getRandomMove() {
-        int stillToBePlaced = g.getN() - gs.getPlacedVertices().size();
-        int next = r.nextInt(stillToBePlaced);
-        int skipped = 0;
-        Vertex v = null;
-        for (Vertex u : g.getVertices()) {
-            if (!gs.getPlacedVertices().contains(u)) {
-                if (skipped < next) {
-                    skipped++;
-                    continue;
-                }
-                v = u;
-                break;
-            }
-        }
-        Coordinate c;
-        do {
-            c = new Coordinate(r.nextInt(width), r.nextInt(height));
-        } while (gs.getUsedCoordinates()[c.getX()][c.getY()] != 0);
-        return new GameMove(v, c);
-    }
-
-    public ArrayList<Vertex> getNeighbors(Vertex v) {
-        Iterable<Edge> e = g.getIncidentEdges(v);
-        ArrayList<Vertex> neighbors = new ArrayList<>();
-        for (Edge edge : e) {
-            neighbors.add(v.equals(edge.getS()) ? edge.getS() : edge.getT());
-        }
-        assert neighbors.size() > 1;
-        return neighbors;
-    }
-
-    public double myRound(double val) {
-        if (val < 0) {
-            return Math.ceil(val);
-        }
-        return Math.floor(val);
-    }
-
-    @Override
-    public void initializeNextRound(Graph g, int width, int height, Role role) {
-        this.g = g;
-        this.width = width;
-        this.height = height;
-        this.gs = new GameState(width, height);
-        this.betterEdgeCrossing = new BetterEdgeCrossing();
-
-        for (Vertex vertex : g.getVertices()) {
-            mappedVertecies.put(vertex.getId(), vertex);
-        }
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * An enum describing the strategy used
-     * 
-     * BruteForce: always choose the BruteForceMove
-     * Mirroring: always choose the MirroringMove
-     * Percentage: given a percentage choose the getBruteForceMove randomly
-     * Annealing: given a percentage choose the first turns to be getMirroringMove
-     * (e.g. span lines across center first, then getBruteForceMove choice)
-     * AnnealingReverse: given a percentage choose the first turns to be
-     * getBruteForceMove
-     */
-    public enum Strategy {
-        BruteForce, Mirroring, Percentage, Annealing, AnnealingReverse
-    };
-
-    public GameMove betterMinimizer() {
+    public GameMove getMinimizingMove() {
         Vertex vertexToPlace;
         GameMove newMove = null;
         if (lastOwnMove != null) {
-            LinkedList<Vertex> unplacedNeighbors = getUnplacedNeighbors(lastOwnMove.getVertex());
+            ArrayList<Vertex> unplacedNeighbors = getUnplacedNeighbors(lastOwnMove.getVertex());
 
             if (unplacedNeighbors.size() != 0) {
                 vertexToPlace = unplacedNeighbors.getLast();
@@ -526,14 +226,11 @@ public class NewMixingPlayer implements NewPlayer {
             }
         }
         if (newMove == null) {// We either have no real last move or no neighbor for our lastmove
-            // long numberOfVertices = StreamSupport.stream(g.getVertices().spliterator(),
-            // false).count();
-            // long numberOfVertices = g.getN();
-            long largestGap = findLargestGap();
-            vertexToPlace = mappedVertecies.get(Long.toString(largestGap));
+            int largestGap = getLargestGap();
+            vertexToPlace = mapIdToVertex.get(Long.toString(largestGap));
             int circumference = height * 2 + width * 2;
-            int fieldID = (int) largestGap % circumference; // Basically map a vertex to a distinct field vertex one
-                                                            // placed on 0, 0. Vertex two placed on 0, 1. ....
+            int fieldID = largestGap % circumference; // Basically map a vertex to a distinct field vertex one
+                                                      // placed on 0, 0. Vertex two placed on 0, 1. ....
             if (fieldID < width) { // Place on top
                 while (true) {
                     if (gs.getUsedCoordinates()[fieldID][0] == 0) {
@@ -588,55 +285,15 @@ public class NewMixingPlayer implements NewPlayer {
             lastOwnMove = newMove;
             return newMove;
         }
-        lastOwnMove = null; // Found no easy move, do some random stuff and try again
-        return BruteForce(false);
+        // TODO: like this or set lastOwnMove to null (as was before)?
+        // lastOwnMove = getBruteForceMove(false); // Found no easy move, do some random
+        // stuff and try again
+        // return lastOwnMove;
+        lastOwnMove = null;
+        return getBruteForceMove(false); // Found no easy move, do some random stuff and try again
     }
 
-    public LinkedList<Vertex> getUnplacedNeighbors(Vertex v) {
-        Iterable<Edge> e = g.getIncidentEdges(v);
-        LinkedList<Vertex> neighbors = new LinkedList<>();
-        for (Edge edge : e) {
-            Vertex vertexToAdd = v.equals(edge.getS()) ? edge.getS() : edge.getT();
-            if (gs.getPlacedVertices().contains(vertexToAdd))
-                continue;
-            neighbors.add(vertexToAdd);
-        }
-        return neighbors;
-    }
-
-    public long findLargestGap() {
-        int numberOfVertices = g.getN();
-        // Convert the IDs to a list of integers and sort it
-        if (gs.getPlacedVertices().isEmpty()) {
-            return numberOfVertices / 2;
-        }
-
-        List<Integer> ids = gs.getPlacedVertices().stream().map(vertex -> Integer.parseInt(vertex.getId())).sorted()
-                .collect(Collectors.toList());
-
-        // Initialize variables to track the largest gap and its midpoint
-        int largestGap = 0;
-        int largestGapMidpoint = 0;
-
-        // Check the gap between each pair of consecutive IDs
-        for (int i = 0; i < ids.size() - 1; i++) {
-            int gap = ids.get(i + 1) - ids.get(i);
-            if (gap > largestGap) {
-                largestGap = gap;
-                largestGapMidpoint = ids.get(i) + gap / 2;
-            }
-        }
-
-        // Check the gap between the last ID and the total number of vertices
-        int finalGap = (int) numberOfVertices - ids.get(ids.size() - 1);
-        if (finalGap > largestGap) {
-            largestGapMidpoint = ids.get(ids.size() - 1) + finalGap / 2;
-        }
-
-        return largestGapMidpoint;
-    }
-
-    public GameMove BruteForce(boolean maximize) {
+    public GameMove getBruteForceMove(boolean maximize) {
         // get the first vertex that is not yet placed in the
         Vertex v = null;
         for (Vertex v_ : g.getVertices()) {
@@ -669,13 +326,9 @@ public class NewMixingPlayer implements NewPlayer {
         for (int sample = 0; sample < sampleSize; sample++) {
             if (gs.getUsedCoordinates()[xPositions.get(sample)][yPositions.get(sample)] != 0)
                 continue;
-            HashMap<Vertex, Coordinate> vertexCoordinates_ = gs.getVertexCoordinates();
             Coordinate coordinateToAdd = new Coordinate(xPositions.get(sample), yPositions.get(sample));
-            vertexCoordinates_.put(v, coordinateToAdd);
-            betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
-            int crossingsAddedByVertex = betterEdgeCrossing.calculateIntersections(g.getEdges(),
-                    vertexCoordinates_);
-            betterEdgeCrossing.removeCoordinate(v);
+            int crossingsAddedByVertex = betterEdgeCrossing.testCoordinate(v, coordinateToAdd,
+                    gs.getVertexCoordinates());
             if (maximize ? crossingsAddedByVertex > bestCrossingsAddedByVertex
                     : crossingsAddedByVertex < bestCrossingsAddedByVertex) {
                 bestSample = sample;
@@ -684,10 +337,218 @@ public class NewMixingPlayer implements NewPlayer {
         }
 
         Coordinate coordinateToAdd = new Coordinate(xPositions.get(bestSample), yPositions.get(bestSample));
-        HashMap<Vertex, Coordinate> vertexCoordinates_ = gs.getVertexCoordinates();
-        vertexCoordinates_.put(v, coordinateToAdd);
-        betterEdgeCrossing.insertCoordinate(v, vertexCoordinates_);
+        HashMap<Vertex, Coordinate> mapVertexToCoordinate = gs.getVertexCoordinates();
+        mapVertexToCoordinate.put(v, coordinateToAdd);
+        betterEdgeCrossing.insertVertexByCoordinate(v, mapVertexToCoordinate);
 
         return new GameMove(v, coordinateToAdd);
     }
+
+    public GameMove getMirroringMove(GameMove lastMove) {
+        // place it mirrored around center point
+        // on the circle/ellipsis that is halfway between center and border
+        // (1/4 and 3/4 height or width)
+
+        // if it's the first move, take the first vertex and place it on the circle
+        // right side, it's as good as any
+        if (lastMove == null) {
+            return new GameMove(g.getVertices().iterator().next(), new Coordinate(3 * width / 4, 0));
+        }
+
+        GameMove rm = getRandomMove();
+        Vertex v = rm.getVertex();
+        // TODO: rewrite it with unplaced neighbors!!
+        ArrayList<Vertex> neighbors = getUnplacedNeighbors(v);
+        // TODO: get a good vertex
+        // get a good vertex, either one with 2 or 3 fixed neighbors or one that might
+        // enable such a 2, 3 fixed one for oneself not the enemy don't enable the enemy
+        // by fixing a second or third neighbor
+        // Vertex v = getGoodVertex();
+        // TODO: or: choose the best neighbor from the last move with the isSet variable
+        // get neighbors of last move, get the best of those
+        // ArrayList<Vertex> neighbors = getNeighbors(lastMove.getVertex());
+        // List<Boolean> isSet = neighbors.stream().map(neighbor ->
+        // gs.getPlacedVertices().contains(neighbor))
+        // .collect(Collectors.toList());
+        Vertex next = neighbors.get(0);
+        Vertex prev = neighbors.get(1);
+
+        // check if one of the neighbors was placed already
+        Vertex neighbor = null;
+        boolean r = gs.getPlacedVertices().contains(next);
+        boolean t = gs.getPlacedVertices().contains(prev);
+        if (!r && !t) {
+            return getRandomMove();
+            // } else if (r && t) { // maximize both neighbors if both are set (later in
+            // game)
+            // // TODO: do the brute force maximizing here!!!
+            // return rm;
+        } else { // mirror around the center if only one is given
+            neighbor = r ? next : prev;
+            int x = gs.getVertexCoordinates().get(neighbor).getX();
+            int y = gs.getVertexCoordinates().get(neighbor).getY();
+            int ix = width - 1 - x;
+            int iy = height - 1 - y;
+            // mirror around the center
+            if (gs.getUsedCoordinates()[ix][iy] == 0) {
+                return new GameMove(v, new Coordinate(ix, iy));
+            }
+            // if taken, take one further away
+            double deltaX = ix - x;
+            double deltaY = iy - y;
+            double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            deltaX /= length;
+            deltaY /= length;
+            int curr = 1;
+            while (true) {
+                // check diagonal point away from original (making it longer)
+                int a = ix + roundToClosestInteger(curr * deltaX);
+                int b = iy + roundToClosestInteger(curr * deltaY);
+                if (a < 0 || a >= width || b < 0 || b >= height) {
+                    break;
+                }
+                if (gs.getUsedCoordinates()[a][b] == 0) {
+                    return new GameMove(v, new Coordinate(a, b));
+                }
+                // else get further away
+                curr++;
+            }
+        }
+        // else return the random move
+        return rm;
+    }
+
+    public GameMove getNeighborMove(Vertex current, Vertex neighbor) {
+        int x = gs.getVertexCoordinates().get(current).getX();
+        int y = gs.getVertexCoordinates().get(current).getY();
+        int neighborhood = 3;
+        for (int i = 1; i < neighborhood; i++) {
+            for (int j = -i; j <= i; j++) {
+                if ((x + j) >= 0 && (x + j) < width) {
+                    for (int k = -i; k <= i; k++) {
+                        if (Math.abs(j) == i || Math.abs(k) == i) {
+                            if ((y + k) >= 0 && (y + k) < height) {
+                                if (gs.getUsedCoordinates()[x + j][y + k] == 0) {
+                                    return new GameMove(neighbor, new Coordinate(x + j, y + k));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return getRandomMove();
+    }
+
+    /**
+     * Computes a random valid move.
+     * 
+     * @return A random valid move.
+     */
+    private GameMove getRandomMove() {
+        int stillToBePlaced = g.getN() - gs.getPlacedVertices().size();
+        int next = r.nextInt(stillToBePlaced);
+        int skipped = 0;
+        Vertex v = null;
+        for (Vertex u : g.getVertices()) {
+            if (!gs.getPlacedVertices().contains(u)) {
+                if (skipped < next) {
+                    skipped++;
+                    continue;
+                }
+                v = u;
+                break;
+            }
+        }
+        Coordinate c;
+        do {
+            c = new Coordinate(r.nextInt(width), r.nextInt(height));
+        } while (gs.getUsedCoordinates()[c.getX()][c.getY()] != 0);
+        return new GameMove(v, c);
+    }
+
+    public ArrayList<Vertex> getUnplacedNeighbors(Vertex v) {
+        Iterable<Edge> e = g.getIncidentEdges(v);
+        ArrayList<Vertex> neighbors = new ArrayList<>();
+        for (Edge edge : e) {
+            Vertex vertexToAdd = v.equals(edge.getS()) ? edge.getS() : edge.getT();
+            if (gs.getPlacedVertices().contains(vertexToAdd))
+                continue;
+            neighbors.add(vertexToAdd);
+        }
+        return neighbors;
+    }
+
+    public int getLargestGap() {
+        // Convert the IDs to a list of integers and sort it
+        if (gs.getPlacedVertices().isEmpty()) {
+            return g.getN() / 2;
+        }
+
+        List<Integer> ids = gs.getPlacedVertices().stream().map(vertex -> Integer.parseInt(vertex.getId())).sorted()
+                .collect(Collectors.toList());
+
+        // Initialize variables to track the largest gap and its midpoint
+        int largestGap = 0;
+        int largestGapMidpoint = 0;
+
+        // Check the gap between each pair of consecutive IDs
+        for (int i = 0; i < ids.size() - 1; i++) {
+            int gap = ids.get(i + 1) - ids.get(i);
+            if (gap > largestGap) {
+                largestGap = gap;
+                largestGapMidpoint = ids.get(i) + gap / 2;
+            }
+        }
+
+        // Check the gap between the last ID and the total number of vertices
+        int finalGap = g.getN() - ids.get(ids.size() - 1);
+        if (finalGap > largestGap) {
+            largestGapMidpoint = ids.get(ids.size() - 1) + finalGap / 2;
+        }
+
+        return largestGapMidpoint;
+    }
+
+    public int roundToClosestInteger(double val) {
+        if (val < 0) {
+            return (int) Math.ceil(val);
+        }
+        return (int) Math.floor(val);
+    }
+
+    @Override
+    public void initializeNextRound(Graph g, int width, int height, Role role) {
+        this.g = g;
+        this.width = width;
+        this.height = height;
+        this.gs = new GameState(width, height);
+
+        this.betterEdgeCrossing = new BetterEdgeCrossing(g);
+
+        for (Vertex vertex : g.getVertices()) {
+            this.mapIdToVertex.put(vertex.getId(), vertex);
+        }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * An enum describing the strategy used
+     * 
+     * BruteForce: always choose the BruteForceMove
+     * Mirroring: always choose the MirroringMove
+     * Percentage: given a percentage choose the getBruteForceMove randomly
+     * Annealing: given a percentage choose the first turns to be getMirroringMove
+     * (e.g. span lines across center first, then getBruteForceMove choice)
+     * AnnealingReverse: given a percentage choose the first turns to be
+     * getBruteForceMove
+     */
+    public enum Strategy {
+        BruteForce, Mirroring, Percentage, Annealing, AnnealingReverse
+    };
+
 }

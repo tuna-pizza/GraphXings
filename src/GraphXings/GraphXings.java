@@ -2,49 +2,38 @@ package GraphXings;
 
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Algorithms.NewRandomPlayer;
-import GraphXings.Algorithms.Player;
-import GraphXings.Algorithms.RandomPlayer;
 import GraphXings.Data.Edge;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Game.GameInstance.ConstantGameInstanceFactory;
 import GraphXings.Game.GameInstance.GameInstanceFactory;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
-import GraphXings.Game.Match.Match;
-import GraphXings.Game.Match.MatchResult;
 import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
-import GraphXings.NewFiles.BruteForcePlayer;
-import GraphXings.NewFiles.MirroringPlayer;
-import GraphXings.NewFiles.MixingPlayer;
-import GraphXings.NewFiles.NewBruteForcePlayer;
-import GraphXings.NewFiles.NewMirroringPlayer;
 import GraphXings.NewFiles.NewMixingPlayer;
+import GraphXings.NewFiles.NewMixingPlayer.Strategy;
 
 public class GraphXings {
     public static void main(String[] args) {
-        // number of games
+        // global matchup config
         int bestOutOf = 100;
-
-        // matchup
-        NewPlayer strategy1 = new NewBruteForcePlayer("NewBruteForcePlayer");
-        NewPlayer strategy2 = new NewMirroringPlayer("NewMirroringPlayer");
-        int percentage = 10;
-        NewPlayer player1 = new NewMixingPlayer("NewMixingPlayer", strategy1, strategy2, percentage);
+        int sampleSize = 10;
+        double percentage = 0.9;
+        Strategy strategy = Strategy.Annealing;
+        NewPlayer player1 = new NewMixingPlayer("NewMixingPlayer", sampleSize, percentage, strategy);
         NewPlayer player2 = new NewRandomPlayer("NewRandomPlayer");
 
-        // type of game (random cycle -> true or constant -> false)
+        // type of game instanciation (random cycle -> true or constant -> false)
         boolean cycleFactory = false;
+        // config to generate the graph for the constant game only(!)
+        int numberOfVertices = 100;
+        int width = 10000;
+        int height = 10000;
 
         GameInstanceFactory gif = null;
         if (cycleFactory) {
             gif = new RandomCycleFactory();
         } else {
-            // generate the graph for the constant game
-            int numberOfVertices = 100;
-            int width = 10000;
-            int height = 10000;
-
             Graph g = new Graph();
             Vertex firstVertex = new Vertex(Integer.toString(0));
             Vertex oldVertex = firstVertex;
