@@ -10,8 +10,6 @@ import java.util.stream.StreamSupport;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;
-import GraphXings.Game.InvalidMoveException;
-import GraphXings.Game.NewInvalidMoveException;
 import GraphXings.Data.*;
 
 /**
@@ -452,6 +450,10 @@ public class NewMixingPlayer implements NewPlayer {
 
     public ArrayList<Vertex> getUnplacedNeighbors(Vertex v) {
         ArrayList<Vertex> neighbors = new ArrayList<>();
+        // TODO: why does this happen??
+        if (g.getIncidentEdges(v) == null) {
+            return neighbors;
+        }
         for (Edge edge : g.getIncidentEdges(v)) {
             Vertex vertexToAdd = v.equals(edge.getS()) ? edge.getT() : edge.getS();
             if (!gs.getPlacedVertices().contains(vertexToAdd)) {
