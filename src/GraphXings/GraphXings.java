@@ -16,9 +16,9 @@ import GraphXings.NewFiles.NewMixingPlayer.Strategy;
 public class GraphXings {
     public static void main(String[] args) {
         // global matchup config
-        int bestOutOf = 100;
+        int bestOutOf = 1;
         int sampleSize = 10;
-        double percentage = 0.9;
+        double percentage = 0.995;
         Strategy strategy = Strategy.Annealing;
         NewPlayer player1 = new NewMixingPlayer("NewMixingPlayer", sampleSize, percentage, strategy);
         NewPlayer player2 = new NewRandomPlayer("NewRandomPlayer");
@@ -26,9 +26,10 @@ public class GraphXings {
         // type of game instanciation (random cycle -> true or constant -> false)
         boolean cycleFactory = false;
         // config to generate the graph for the constant game only(!)
-        int numberOfVertices = 100;
+        int numberOfVertices = 10000;
         int width = 10000;
         int height = 10000;
+        assert numberOfVertices <= (width * height) : "Graph not possible";
 
         GameInstanceFactory gif = null;
         if (cycleFactory) {

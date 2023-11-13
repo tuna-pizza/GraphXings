@@ -73,7 +73,6 @@ public class BetterEdgeCrossing {
         // (default) the "vertices" only hold 1 vertex we might add
         for (Vertex vertex : vertices) {
             // iterate over the edges adjacent to this vertex
-            // TODO: vertex id starts with 1!?!?!
             for (Edge edge : g.getIncidentEdges(vertex)) {
                 // for the current edge get the neighbor
                 Vertex neighbor = vertex == edge.getS() ? edge.getT() : edge.getS();

@@ -5,8 +5,7 @@ import GraphXings.Algorithms.NewPlayer;
 /**
  * An exception that can be thrown when an illegal move is detected.
  */
-public class NewInvalidMoveException extends Exception
-{
+public class NewInvalidMoveException extends Exception {
 	/**
 	 * The cheating player.
 	 */
@@ -14,19 +13,19 @@ public class NewInvalidMoveException extends Exception
 
 	/**
 	 * Constructor that creates an InvalidMoveException.
+	 * 
 	 * @param cheater The cheating player.
 	 */
-	protected NewInvalidMoveException(NewPlayer cheater)
-	{
+	protected NewInvalidMoveException(NewPlayer cheater) {
 		this.cheater = cheater;
 	}
 
 	/**
 	 * Gets the player that cheated.
+	 * 
 	 * @return The cheating player.
 	 */
-	public NewPlayer getCheater()
-	{
+	public NewPlayer getCheater() {
 		return cheater;
 	}
 }

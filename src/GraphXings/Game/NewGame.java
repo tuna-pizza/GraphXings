@@ -103,6 +103,7 @@ public class NewGame {
 		GameMove lastMove = null;
 		long timeMaximizer = 0;
 		long timeMinimizer = 0;
+		long startTime = System.nanoTime();
 		while (turn < g.getN()) {
 			GameMove newMove;
 			if (turn % 2 == 0) {
@@ -130,6 +131,7 @@ public class NewGame {
 			lastMove = newMove;
 			turn++;
 		}
+		System.out.println((System.nanoTime() - startTime) / 1000000 + "ms");
 		CrossingCalculator cc = new CrossingCalculator(g, gs.getVertexCoordinates());
 		return cc.computeCrossingNumber();
 	}
