@@ -6,10 +6,7 @@ import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -89,6 +86,13 @@ public class Game
      */
     public GameResult play()
     {
+        Random r = new Random(System.nanoTime());
+        if (r.nextBoolean())
+        {
+            Player swap = player1;
+            player1 = player2;
+            player2 = swap;
+        }
         try
         {
             player1.initializeNextRound(g.copy(),width,height, Player.Role.MAX);

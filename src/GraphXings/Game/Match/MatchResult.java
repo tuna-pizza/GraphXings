@@ -75,6 +75,22 @@ public class MatchResult
 		return gamesWon2;
 	}
 
+	public Player getWinner()
+	{
+		if (gamesWon1 > gamesWon2)
+		{
+			return player1;
+		}
+		else if (gamesWon2 > gamesWon1)
+		{
+			return player2;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 	/**
 	 * Gets a string announcing the results of the match!
 	 * @return A string announcing the results of the match.

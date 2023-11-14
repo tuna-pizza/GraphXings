@@ -2,9 +2,11 @@ package GraphXings.Game;
 
 import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
+import GraphXings.Algorithms.Player;
 import GraphXings.Data.Graph;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * A class for managing a game of GraphXings!
@@ -79,6 +81,13 @@ public class NewGame
 	 */
 	public NewGameResult play()
 	{
+		Random r = new Random(System.nanoTime());
+		if (r.nextBoolean())
+		{
+			NewPlayer swap = player1;
+			player1 = player2;
+			player2 = swap;
+		}
 		try
 		{
 			player1.initializeNextRound(g.copy(),width,height, NewPlayer.Role.MAX);
