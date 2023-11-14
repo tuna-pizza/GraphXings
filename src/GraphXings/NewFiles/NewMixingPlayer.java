@@ -70,6 +70,13 @@ public class NewMixingPlayer implements NewPlayer {
      */
     private Strategy strategy;
 
+    public NewMixingPlayer(String name) {
+        this.name = name;
+        this.sampleSize = 10;
+        this.percentage = 0.995;
+        this.strategy = Strategy.Annealing;
+    }
+
     /**
      * Creates a player with the assigned name.
      * that mixes two strategies
@@ -153,8 +160,7 @@ public class NewMixingPlayer implements NewPlayer {
             // System.out.println("lastOwnMove != null");
             ArrayList<Vertex> unplacedNeighbors = getUnplacedNeighbors(lastOwnMove.getVertex());
             if (unplacedNeighbors.size() != 0) {
-                vertexToPlace = unplacedNeighbors.getLast();
-
+                vertexToPlace = unplacedNeighbors.get(unplacedNeighbors.size() - 1);
                 int lastX = lastOwnMove.getCoordinate().getX();
                 int lastY = lastOwnMove.getCoordinate().getY();
                 // System.out.println(lastX + " " + lastY);

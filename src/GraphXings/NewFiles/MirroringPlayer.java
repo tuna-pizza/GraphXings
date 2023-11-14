@@ -152,7 +152,7 @@ public class MirroringPlayer implements Player {
 
         // get the neighbor vertex
         LinkedList<Vertex> neighbors = null;
-        GameMove lastMove = gameMoves.getLast();
+        GameMove lastMove = gameMoves.get(gameMoves.size() - 1);
         Vertex current = lastMove.getVertex();
         neighbors = getNeighbors(g, current);
         Vertex next = neighbors.get(0);
