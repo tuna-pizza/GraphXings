@@ -8,8 +8,7 @@ import GraphXings.Game.GameState;
 
 import java.util.Random;
 
-public class NewRandomPlayer implements NewPlayer
-{
+public class NewRandomPlayer implements NewPlayer {
 	/**
 	 * The name of the random player.
 	 */
@@ -34,22 +33,21 @@ public class NewRandomPlayer implements NewPlayer
 	 * The height of the game board.
 	 */
 	private int height;
+
 	/**
 	 * Creates a random player with the assigned name.
+	 * 
 	 * @param name
 	 */
-	public NewRandomPlayer(String name)
-	{
+	public NewRandomPlayer(String name) {
 		this.name = name;
-		this.r =  new Random(name.hashCode());
+		this.r = new Random(name.hashCode());
 	}
 
 	@Override
-	public GameMove maximizeCrossings(GameMove lastMove)
-	{
+	public GameMove maximizeCrossings(GameMove lastMove) {
 		// First: Apply the last move by the opponent if there is one.
-		if (lastMove != null)
-		{
+		if (lastMove != null) {
 			gs.applyMove(lastMove);
 		}
 		// Second: Compute the new move.
@@ -61,11 +59,9 @@ public class NewRandomPlayer implements NewPlayer
 	}
 
 	@Override
-	public GameMove minimizeCrossings(GameMove lastMove)
-	{
+	public GameMove minimizeCrossings(GameMove lastMove) {
 		// First: Apply the last move by the opponent.
-		if (lastMove != null)
-		{
+		if (lastMove != null) {
 			gs.applyMove(lastMove);
 		}
 		// Second: Compute the new move.
@@ -77,50 +73,43 @@ public class NewRandomPlayer implements NewPlayer
 	}
 
 	@Override
-	public void initializeNextRound(Graph g, int width, int height, Role role)
-	{
+	public void initializeNextRound(Graph g, int width, int height, Role role) {
 		// Store graph, width, height and create a new GameState.
 		this.g = g;
 		this.width = width;
 		this.height = height;
-		this.gs = new GameState(width,height);
+		this.gs = new GameState(width, height);
 	}
 
 	/**
 	 * Computes a random valid move.
+	 * 
 	 * @return A random valid move.
 	 */
-	private GameMove randomMove()
-	{
-		int stillToBePlaced = g.getN()- gs.getPlacedVertices().size();
+	private GameMove randomMove() {
+		int stillToBePlaced = g.getN() - gs.getPlacedVertices().size();
 		int next = r.nextInt(stillToBePlaced);
 		int skipped = 0;
-		Vertex v=null;
-		for (Vertex u : g.getVertices())
-		{
-			if (!gs.getPlacedVertices().contains(u))
-			{
-				if (skipped < next)
-				{
+		Vertex v = null;
+		for (Vertex u : g.getVertices()) {
+			if (!gs.getPlacedVertices().contains(u)) {
+				if (skipped < next) {
 					skipped++;
 					continue;
 				}
-				v=u;
+				v = u;
 				break;
 			}
 		}
 		Coordinate c;
-		do
-		{
-			c = new Coordinate(r.nextInt(width),r.nextInt(height));
-		}
-		while (gs.getUsedCoordinates()[c.getX()][c.getY()]!=0);
-		return new GameMove(v,c);
+		do {
+			c = new Coordinate(r.nextInt(width), r.nextInt(height));
+		} while (gs.getUsedCoordinates()[c.getX()][c.getY()] != 0);
+		return new GameMove(v, c);
 	}
 
 	@Override
-	public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 }
