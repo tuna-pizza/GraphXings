@@ -44,6 +44,7 @@ public class NewMixingPlayer implements NewPlayer {
      * The Edge Crossing algorithm to be applied
      */
     private BetterEdgeCrossing betterEdgeCrossing;
+    private BetterEdgeCrossingRTree betterEdgeCrossingRTree;
     /**
      * The sample size of the brute force method
      */
@@ -69,6 +70,8 @@ public class NewMixingPlayer implements NewPlayer {
      * The strategy used (see Strategy enum)
      */
     private Strategy strategy;
+
+
 
     /**
      * Creates a player with the assigned name.
@@ -340,7 +343,8 @@ public class NewMixingPlayer implements NewPlayer {
         HashMap<Vertex, Coordinate> mapVertexToCoordinate = gs.getVertexCoordinates();
         mapVertexToCoordinate.put(v, coordinateToAdd);
         betterEdgeCrossing.insertVertexByCoordinate(v, mapVertexToCoordinate);
-
+        betterEdgeCrossingRTree.insertVertexByCoordinate(v, mapVertexToCoordinate);
+        System.out.println(betterEdgeCrossingRTree.calculateIntersections(mapVertexToCoordinate));
         return new GameMove(v, coordinateToAdd);
     }
 
@@ -518,6 +522,7 @@ public class NewMixingPlayer implements NewPlayer {
         this.gs = new GameState(width, height);
 
         this.betterEdgeCrossing = new BetterEdgeCrossing(g);
+        this.betterEdgeCrossingRTree = new BetterEdgeCrossingRTree(g);
 
         for (Vertex vertex : g.getVertices()) {
             this.mapIdToVertex.put(vertex.getId(), vertex);
