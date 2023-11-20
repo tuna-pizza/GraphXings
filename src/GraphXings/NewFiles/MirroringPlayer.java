@@ -1,28 +1,41 @@
 package GraphXings.NewFiles;
 
-import GraphXings.Algorithms.Player;
-import GraphXings.Data.Coordinate;
-import GraphXings.Data.Edge;
-import GraphXings.Data.Graph;
-import GraphXings.Data.Vertex;
-import GraphXings.Game.GameMove;
-
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
-import java.lang.Math;
+import GraphXings.Game.GameMove;
+import GraphXings.Game.GameState;
+import GraphXings.Algorithms.NewPlayer;
+import GraphXings.Data.*;
 
 /**
  * A player performing random moves.
  */
-public class MirroringPlayer implements Player {
+public class MirroringPlayer implements NewPlayer {
     /**
-     * The name of the random player.
+     * The name of the Good palyer
      */
     private String name;
+    /**
+     * A random number generator.
+     */
+    private Random r;
+    /**
+     * The graph to be drawn.
+     */
+    private Graph g;
+    /**
+     * The current state of the game;
+     */
+    private GameState gs;
+    /**
+     * The width of the game board.
+     */
+    private int width;
+    /**
+     * The height of the game board.
+     */
+    private int height;
 
     /**
      * Creates a random player with the assigned name.
@@ -31,6 +44,7 @@ public class MirroringPlayer implements Player {
      */
     public MirroringPlayer(String name) {
         this.name = name;
+        this.r = new Random(name.hashCode());
     }
 
     public double myRound(double val) {
@@ -41,12 +55,38 @@ public class MirroringPlayer implements Player {
     }
 
     @Override
-    public GameMove maximizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
-            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
+    public GameMove maximizeCrossings(GameMove lastMove) {
+        // First: Apply the last move by the opponent.
+        if (lastMove != null) {
+            gs.applyMove(lastMove);
+        }
+        // Second: Compute the new move.
+        GameMove newMove = getMaximizingMove(lastMove);
+        // Third: Apply the new move to the local GameState.
+        gs.applyMove(newMove);
+        // Finally: Return the new move.
+        return newMove;
+    }
+
+    @Override
+    public GameMove minimizeCrossings(GameMove lastMove) {
+        // First: Apply the last move by the opponent.
+        if (lastMove != null) {
+            gs.applyMove(lastMove);
+        }
+        // Second: Compute the new move.
+        GameMove newMove = getMinimizingMove(lastMove);
+        // Third: Apply the new move to the local GameState.
+        gs.applyMove(newMove);
+        // Finally: Return the new move.
+        return newMove;
+    }
+
+    public GameMove getMaximizingMove(GameMove lastMove) {
         // place it as far away as possible (mirrored around center point)
 
         // get random move to start from
-        GameMove rm = randomMove(g, usedCoordinates, placedVertices, width, height);
+        GameMove rm = randomMove();
         Vertex v = rm.getVertex();
 
         // get neighbors
@@ -56,8 +96,8 @@ public class MirroringPlayer implements Player {
 
         // check if one of the neighbors was placed already
         Vertex neighbor = null;
-        boolean r = placedVertices.contains(next);
-        boolean t = placedVertices.contains(prev);
+        boolean r = gs.getPlacedVertices().contains(next);
+        boolean t = gs.getPlacedVertices().contains(prev);
         if (!r && !t) {
             return rm;
             // } else if (r && t) { // maximize both neighbors if both are set (later in
@@ -66,12 +106,12 @@ public class MirroringPlayer implements Player {
             // return rm;
         } else { // mirror around the center if only one is given
             neighbor = r ? next : prev;
-            int x = vertexCoordinates.get(neighbor).getX();
-            int y = vertexCoordinates.get(neighbor).getY();
+            int x = gs.getVertexCoordinates().get(neighbor).getX();
+            int y = gs.getVertexCoordinates().get(neighbor).getY();
             int ix = width - 1 - x;
             int iy = height - 1 - y;
             // mirror around the center
-            if (usedCoordinates[ix][iy] == 0) {
+            if (gs.getUsedCoordinates()[ix][iy] == 0) {
                 return new GameMove(v, new Coordinate(ix, iy));
             }
             // if taken, take one further away
@@ -88,7 +128,7 @@ public class MirroringPlayer implements Player {
                 if (a < 0 || a >= width || b < 0 || b >= height) {
                     break;
                 }
-                if (usedCoordinates[a][b] == 0) {
+                if (gs.getUsedCoordinates()[a][b] == 0) {
                     return new GameMove(v, new Coordinate(a, b));
                 }
                 // else get further away
@@ -108,7 +148,8 @@ public class MirroringPlayer implements Player {
         // the current vertex
         // neighbor = prev;
         // } else { // if both are set
-        // return randomMove(g, usedCoordinates, placedVertices, width, height);
+        // return randomMove(g, gs.getUsedCoordinates(), gs.getPlacedVertices(), width,
+        // height);
         // }
     }
 
@@ -122,11 +163,9 @@ public class MirroringPlayer implements Player {
         return neighbors;
     }
 
-    public GameMove neighborMove(Vertex current, Vertex neighbor, Graph g,
-            HashMap<Vertex, Coordinate> vertexCoordinates,
-            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-        int x = vertexCoordinates.get(current).getX();
-        int y = vertexCoordinates.get(current).getY();
+    public GameMove neighborMove(Vertex current, Vertex neighbor) {
+        int x = gs.getVertexCoordinates().get(current).getX();
+        int y = gs.getVertexCoordinates().get(current).getY();
         int neighborhood = 3;
         for (int i = 1; i < neighborhood; i++) {
             for (int j = -i; j <= i; j++) {
@@ -134,7 +173,7 @@ public class MirroringPlayer implements Player {
                     for (int k = -i; k <= i; k++) {
                         if (Math.abs(j) == i || Math.abs(k) == i) {
                             if ((y + k) >= 0 && (y + k) < height) {
-                                if (usedCoordinates[x + j][y + k] == 0) {
+                                if (gs.getUsedCoordinates()[x + j][y + k] == 0) {
                                     return new GameMove(neighbor, new Coordinate(x + j, y + k));
                                 }
                             }
@@ -143,16 +182,12 @@ public class MirroringPlayer implements Player {
                 }
             }
         }
-        return randomMove(g, usedCoordinates, placedVertices, width, height);
+        return randomMove();
     }
 
-    @Override
-    public GameMove minimizeCrossings(Graph g, HashMap<Vertex, Coordinate> vertexCoordinates, List<GameMove> gameMoves,
-            int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width, int height) {
-
+    public GameMove getMinimizingMove(GameMove lastMove) {
         // get the neighbor vertex
         LinkedList<Vertex> neighbors = null;
-        GameMove lastMove = gameMoves.getLast();
         Vertex current = lastMove.getVertex();
         neighbors = getNeighbors(g, current);
         Vertex next = neighbors.get(0);
@@ -163,12 +198,12 @@ public class MirroringPlayer implements Player {
         Vertex prevprev = current.equals(neighbors.get(0)) ? neighbors.get(1) : neighbors.get(0);
         Vertex neighbor = null;
 
-        boolean r = placedVertices.contains(next);
-        boolean t = placedVertices.contains(prev);
-        boolean z = placedVertices.contains(nextnext);
-        boolean u = placedVertices.contains(prevprev);
+        boolean r = gs.getPlacedVertices().contains(next);
+        boolean t = gs.getPlacedVertices().contains(prev);
+        boolean z = gs.getPlacedVertices().contains(nextnext);
+        boolean u = gs.getPlacedVertices().contains(prevprev);
         if (!r && !t) { // TODO: if neither neighbor is set get the neighbor that has 2 fixed neighbors
-                        // if possible
+            // if possible
             neighbor = z ? next : (u ? prev : next);
         } else if (!r) { // check if next neighbor (id+1) can be placed next to the current vertex
             neighbor = next;
@@ -182,37 +217,33 @@ public class MirroringPlayer implements Player {
                 current = prev;
                 neighbor = prevprev;
             } else {
-                return randomMove(g, usedCoordinates, placedVertices, width, height);
+                return randomMove();
             }
         }
 
-        return neighborMove(current, neighbor, g, vertexCoordinates, usedCoordinates, placedVertices, width, height);
+        return neighborMove(current, neighbor);
     }
 
     @Override
     public void initializeNextRound(Graph g, int width, int height, Role role) {
-        // TODO: do we need something here?
+        this.g = g;
+        this.width = width;
+        this.height = height;
+        this.gs = new GameState(width, height);
     }
 
     /**
-     * Computes a non-random valid move.
+     * Computes a random valid move.
      * 
-     * @param g               The graph.
-     * @param usedCoordinates The used coordinates.
-     * @param placedVertices  The already placed vertices.
-     * @param width           The width of the game board.
-     * @param height          The height of the game board.
      * @return A random valid move.
      */
-    private GameMove randomMove(Graph g, int[][] usedCoordinates, HashSet<Vertex> placedVertices, int width,
-            int height) {
-        Random r = new Random();
-        int stillToBePlaced = g.getN() - placedVertices.size();
+    private GameMove randomMove() {
+        int stillToBePlaced = g.getN() - gs.getPlacedVertices().size();
         int next = r.nextInt(stillToBePlaced);
         int skipped = 0;
         Vertex v = null;
         for (Vertex u : g.getVertices()) {
-            if (!placedVertices.contains(u)) {
+            if (!gs.getPlacedVertices().contains(u)) {
                 if (skipped < next) {
                     skipped++;
                     continue;
@@ -221,10 +252,10 @@ public class MirroringPlayer implements Player {
                 break;
             }
         }
-        Coordinate c = new Coordinate(0, 0);
+        Coordinate c;
         do {
             c = new Coordinate(r.nextInt(width), r.nextInt(height));
-        } while (usedCoordinates[c.getX()][c.getY()] != 0);
+        } while (gs.getUsedCoordinates()[c.getX()][c.getY()] != 0);
         return new GameMove(v, c);
     }
 
