@@ -1,9 +1,9 @@
-package GraphXings.Game.League;
+package GraphXings.Legacy.Game.League;
 
-import GraphXings.Algorithms.Player;
+import GraphXings.Legacy.Algorithms.Player;
 import GraphXings.Game.GameInstance.GameInstanceFactory;
-import GraphXings.Game.Match.Match;
-import GraphXings.Game.Match.MatchResult;
+import GraphXings.Legacy.Game.Match.Match;
+import GraphXings.Legacy.Game.Match.MatchResult;
 
 import java.util.HashMap;
 import java.util.List;

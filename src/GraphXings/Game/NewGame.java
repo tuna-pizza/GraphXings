@@ -2,10 +2,9 @@ package GraphXings.Game;
 
 import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
-import GraphXings.Algorithms.Player;
 import GraphXings.Data.Graph;
+import GraphXings.Legacy.Game.InvalidMoveException;
 
-import java.util.LinkedList;
 import java.util.Random;
 
 /**

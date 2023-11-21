@@ -1,6 +1,6 @@
-package GraphXings.Game.League;
+package GraphXings.Legacy.Game.League;
 
-import GraphXings.Algorithms.Player;
+import GraphXings.Legacy.Algorithms.Player;
 
 import java.util.HashMap;
 

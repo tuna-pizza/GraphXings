@@ -1,6 +1,6 @@
-package GraphXings.Game.Match;
+package GraphXings.Legacy.Game.Match;
 
-import GraphXings.Algorithms.Player;
+import GraphXings.Legacy.Algorithms.Player;
 
 /**
  * A class for storing the results of a match.
