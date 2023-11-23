@@ -12,8 +12,6 @@ import com.github.davidmoten.rtree2.Entry;
 import com.github.davidmoten.rtree2.RTree;
 import com.github.davidmoten.rtree2.geometry.Geometries;
 import com.github.davidmoten.rtree2.geometry.Geometry;
-import com.github.davidmoten.rtree2.geometry.Line;
-import com.github.davidmoten.rtree2.geometry.Point;
 import com.github.davidmoten.rtree2.geometry.Rectangle;
 
 import GraphXings.Data.Coordinate;

@@ -10,15 +10,24 @@ import GraphXings.Game.GameInstance.GameInstanceFactory;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
+import GraphXings.NewFiles.DrawGraph;
 import GraphXings.NewFiles.MixingPlayer;
 import GraphXings.NewFiles.MixingPlayer.Strategy;
 
 public class GraphXings {
     public static void main(String[] args) {
+
+        if(1==1) {
+        new DrawGraph();
+        
+        return;
+        }
+ 
+
         // global matchup config
         int bestOutOf = 10;
-        int sampleSize = 10;
-        double percentage = 0.90;
+        int sampleSize = 50;
+        double percentage = 0.93;
         Strategy strategy = Strategy.Annealing;
         NewPlayer player1 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
         NewPlayer player2 = new NewRandomPlayer("RandomPlayer");
@@ -29,9 +38,9 @@ public class GraphXings {
         int seed = 108910;
         boolean includeMatchingEdges = false;
         // config to generate the graph for the constant game only(!)
-        int numberOfVertices = 1000;
-        int width = 1000;
-        int height = 1000;
+        int numberOfVertices = 5000;
+        int width = 5000;
+        int height = 5000;
         assert numberOfVertices <= (width * height) : "Graph not possible";
 
         GameInstanceFactory gif = null;
@@ -58,7 +67,7 @@ public class GraphXings {
         }
 
         // play the matchup
-        NewMatch match = new NewMatch(player1, player2, gif, bestOutOf);
+        NewMatch match = new NewMatch(player1, player2, gif, 1/2);
         long startTime = System.nanoTime();
         NewMatchResult mr = match.play();
         long endTime = System.nanoTime();

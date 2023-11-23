@@ -74,8 +74,8 @@ public class MixingPlayer implements NewPlayer {
 
     public MixingPlayer(String name) {
         this.name = name;
-        this.sampleSize = 10;
-        this.percentage = 0.995;
+        this.sampleSize = 50;
+        this.percentage = 0.93;
         this.strategy = Strategy.Annealing;
     }
 
@@ -382,16 +382,7 @@ public class MixingPlayer implements NewPlayer {
         HashMap<Vertex, Coordinate> mapVertexToCoordinate = gs.getVertexCoordinates();
         mapVertexToCoordinate.put(v, coordinateToAdd);
         betterEdgeCrossingRTree.insertAllCoodinates(gs.getPlacedVertices());
-
-       
-        
-        // System.out.println("Crossings: " + betterEdgeCrossingRTree.testCoordinate(v, coordinateToAdd, gs.getVertexCoordinates()));
-        // betterEdgeCrossingRTree.createImg(gs.getPlacedVertices());
-
-        // CrossingCalculator x = new CrossingCalculator(g, mapVertexToCoordinate);
-        // System.out.println("Crossing calc: " + x.computeCrossingNumber() + " crossings in round: " + gs.getPlacedVertices().size());
-
-        
+    
         return new GameMove(v, coordinateToAdd);
     }
 
