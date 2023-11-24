@@ -81,6 +81,9 @@ public class NewMatch {
 			NewGame game = new NewGame(gi.getG(), gi.getWidth(), gi.getHeight(), player1, player2, gameTimeLimit);
 			NewGameResult gr = game.play();
 			gamesPlayed++;
+			if (gamesPlayed == 5) {
+				System.out.println("here");
+			}
 			System.out.println("Game " + gamesPlayed + ": " + gr.announceResult());
 			if (gamesPlayed > 2 * bestOutOf) {
 				end = true;

@@ -12,30 +12,34 @@ import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
 import GraphXings.NewFiles.MixingPlayer;
 import GraphXings.NewFiles.MixingPlayer.Strategy;
+import GraphXings.NewFiles.otherGroups.Abgabegruppe_8_737_assignsubmission_file.Gruppe8.Gruppe8.EfficientWinningPlayer;
 
 public class GraphXings {
     public static void main(String[] args) {
 
+        // if(1==1) {
+        // new DrawGraph();
+        //
+        // return;
+        // }
+
         // global matchup config
-        int bestOutOf = 10;
-        int sampleSize = 10;
-        double percentage = 0.95;
+        int bestOutOf = 20;
+        int sampleSize = 50;
+        double percentage = 0.93;
         Strategy strategy = Strategy.Annealing;
-    
-         NewPlayer player2 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
-         NewPlayer player1 = new NewRandomPlayer("EfficientWinningPlayer1");
-        // NewPlayer player1 = new NewRandomPlayer("EfficientWinningPlayer");
-        
+        NewPlayer player1 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
+        NewPlayer player2 = new EfficientWinningPlayer("Grp8");
 
         // type of game instanciation (random cycle -> true or constant -> false)
-        boolean cycleFactory = false;
+        boolean cycleFactory = true;
         // config to generate the graph from cycleFactory
         int seed = 108910;
-        boolean includeMatchingEdges = false;
+        boolean includeMatchingEdges = true;
         // config to generate the graph for the constant game only(!)
-        int numberOfVertices = 5000;
-        int width = 5000;
-        int height = 5000;
+        int numberOfVertices = 1000;
+        int width = 1000;
+        int height = 1000;
         assert numberOfVertices <= (width * height) : "Graph not possible";
 
         GameInstanceFactory gif = null;
@@ -62,7 +66,7 @@ public class GraphXings {
         }
 
         // play the matchup
-        NewMatch match = new NewMatch(player1, player2, gif, 1/2);
+        NewMatch match = new NewMatch(player1, player2, gif, bestOutOf);
         long startTime = System.nanoTime();
         NewMatchResult mr = match.play();
         long endTime = System.nanoTime();
