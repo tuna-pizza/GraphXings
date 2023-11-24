@@ -12,16 +12,11 @@ import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
 import GraphXings.NewFiles.MixingPlayer;
 import GraphXings.NewFiles.MixingPlayer.Strategy;
-import GraphXings.NewFiles.otherGroups.Abgabegruppe_8_737_assignsubmission_file.Gruppe8.Gruppe8.EfficientWinningPlayer;
+
+
 
 public class GraphXings {
     public static void main(String[] args) {
-
-        // if(1==1) {
-        // new DrawGraph();
-        //
-        // return;
-        // }
 
         // global matchup config
         int bestOutOf = 20;
@@ -29,10 +24,10 @@ public class GraphXings {
         double percentage = 0.93;
         Strategy strategy = Strategy.Annealing;
         NewPlayer player1 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
-        NewPlayer player2 = new EfficientWinningPlayer("Grp8");
+        NewPlayer player2 = new NewRandomPlayer("RandomPlayer");
 
         // type of game instanciation (random cycle -> true or constant -> false)
-        boolean cycleFactory = true;
+        boolean cycleFactory = false;
         // config to generate the graph from cycleFactory
         int seed = 108910;
         boolean includeMatchingEdges = true;
@@ -66,7 +61,7 @@ public class GraphXings {
         }
 
         // play the matchup
-        NewMatch match = new NewMatch(player1, player2, gif, bestOutOf);
+        NewMatch match = new NewMatch(player1, player2, gif, 1/2);
         long startTime = System.nanoTime();
         NewMatchResult mr = match.play();
         long endTime = System.nanoTime();

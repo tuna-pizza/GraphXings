@@ -13,7 +13,7 @@ public class GraphPanel extends JPanel {
 
     private List<Coordinate> coordinates;
     private List<GuiCoordinate> guiCoordinates;
-    private double zoomFactor = 0.2;
+    private double zoomFactor = 1.0;
     private Point lastMousePosition;
     private int panelHeight = 700;
     private int panelWidth = 700;
@@ -22,7 +22,7 @@ public class GraphPanel extends JPanel {
 
     public GraphPanel() {
         this.coordinates = new ArrayList<>();
-        this.guiCoordinates = new ArrayList<>(); // Initialize the new list
+        this.guiCoordinates = new ArrayList<>();
 
             addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
@@ -90,10 +90,15 @@ public class GraphPanel extends JPanel {
     }
 
     private void translateView(double deltaX, double deltaY) {
-        for (GuiCoordinate guiCoordinate : guiCoordinates) {
+        try {
+            for (GuiCoordinate guiCoordinate : guiCoordinates) {
             guiCoordinate.translate(deltaX, deltaY);
         }
         updateOriginalCoordinates();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+       
     }
 
     private void updateOriginalCoordinates() {
@@ -127,9 +132,10 @@ public class GraphPanel extends JPanel {
     }
 
     private void updateGuiCoordinates() {
-        // Update guiCoordinates based on the current zoom and translation
-        guiCoordinates.clear();
-        for (Coordinate coordinate : coordinates) {
+        try {
+             // Update guiCoordinates based on the current zoom and translation
+            guiCoordinates.clear();
+            for (Coordinate coordinate : coordinates) {
             int x = coordinate.getX();
             int y = coordinate.getY();
 
@@ -139,6 +145,10 @@ public class GraphPanel extends JPanel {
 
             guiCoordinates.add(new GuiCoordinate(scaledX, scaledY));
         }
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+       
     }
 
     @Override
@@ -152,12 +162,12 @@ public class GraphPanel extends JPanel {
 
         // Draw your points on the panel
         for (int i = 0; i < guiCoordinates.size(); i++) {
+          try {
+            try {
             GuiCoordinate guiCoordinate = guiCoordinates.get(i);
-
             int x = guiCoordinate.getX();
             int y = guiCoordinate.getY();
-
-            // Adjust the size of the points
+                             // Adjust the size of the points
             int scaledPointSize = (int) (10 / zoomFactor);
 
             // Alternate colors based on the index
@@ -168,6 +178,13 @@ public class GraphPanel extends JPanel {
             }
 
             g2d.fillOval(x - scaledPointSize / 2, y - scaledPointSize / 2, scaledPointSize, scaledPointSize);
+
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+          } catch (IndexOutOfBoundsException e) {
+            // TODO: handle exception
+          } 
         }
     }
 

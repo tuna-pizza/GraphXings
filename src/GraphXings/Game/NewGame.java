@@ -107,9 +107,10 @@ public class NewGame {
 			int crossingsGame1 = playRound(player1, player2);
 			if(showGui) {
 				try {
+					Thread.sleep(5000);
 					graphPanel.clearPanel();
 					coordinateList.clear();
-					Thread.sleep(5000);
+					
 				
 				} catch (InterruptedException e) {
 					e.printStackTrace();

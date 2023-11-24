@@ -60,10 +60,9 @@ public class MixingPlayer implements NewPlayer {
     // TODO: alternatively: change the sample size of the brute force player part
     private double percentage;
     /**
-     * Minimizer builds a tree, these are the open endpoints of this tree where we
-     * can add an edge
+     * The last move made by this player
      */
-    private ArrayList<Vertex> openTreeEndpoints = new ArrayList<>();
+    private GameMove lastOwnMove = null;
     /**
      * The id of a vertex mapped to its vertex object
      */
@@ -167,8 +166,9 @@ public class MixingPlayer implements NewPlayer {
         }
         int neighborsStolen = 0;
         for (Vertex vertex : vertexFiFo) {
-            if (g.getIncidentEdges(vertex) == null)
+            if(g.getIncidentEdges(vertex) == null) {
                 continue;
+            }
             Iterator<Edge> edges = g.getIncidentEdges(vertex).iterator();
             while (edges.hasNext()) {
                 Edge edge = edges.next();
@@ -185,36 +185,23 @@ public class MixingPlayer implements NewPlayer {
     }
 
     public GameMove getMinimizingMove() {
-        Vertex vertexToPlace = null;
+        Vertex vertexToPlace;
         GameMove newMove = null;
         // If the enemy tries to counter our method by always placing our neighbours we
         // return to random playing
 
-        if (enemyCounterMinimzer()) {
-            return getBruteForceMove(false);
-        }
+        // if (enemyCounterMinimzer()) {
+        //     lastOwnMove = null;
+        //     return getBruteForceMove(false);
+        // }
 
-        if (openTreeEndpoints.size() > 0) {
+        if (lastOwnMove != null) {
             // System.out.println("lastOwnMove != null");
-            ArrayList<Vertex> unplacedNeighbors = new ArrayList<>();
-            Vertex referenceVertex = null;
-            ArrayList<Vertex> usedUpVertices = new ArrayList<>();
-            for (Vertex referenceVertex_ : openTreeEndpoints) {
-                unplacedNeighbors = getUnplacedNeighbors(referenceVertex_);
-                if (unplacedNeighbors.size() > 0) {
-                    referenceVertex = referenceVertex_;
-                    break;
-                } else {
-                    usedUpVertices.add(referenceVertex_);
-                }
-            }
-            for (Vertex vertexToRemove : usedUpVertices) {
-                openTreeEndpoints.remove(vertexToRemove);
-            }
-            if (unplacedNeighbors.size() > 0) {
+            ArrayList<Vertex> unplacedNeighbors = getUnplacedNeighbors(lastOwnMove.getVertex());
+            if (unplacedNeighbors.size() != 0) {
                 vertexToPlace = unplacedNeighbors.get(unplacedNeighbors.size() - 1);
-                int lastX = gs.getVertexCoordinates().get(referenceVertex).getX();
-                int lastY = gs.getVertexCoordinates().get(referenceVertex).getY();
+                int lastX = lastOwnMove.getCoordinate().getX();
+                int lastY = lastOwnMove.getCoordinate().getY();
                 // System.out.println(lastX + " " + lastY);
                 if (lastX < lastY) {// Bottom left area
                     // System.out.print("lastX < lastY");
@@ -338,16 +325,17 @@ public class MixingPlayer implements NewPlayer {
             // System.out.println("bad");
             // }
         }
-        if (newMove != null && vertexToPlace != null) {
+        if (newMove != null) {
             // System.out.println("newMove != null");
             // System.out.println(newMove.getCoordinate().getX() + " " +
             // newMove.getCoordinate().getY());
-            openTreeEndpoints.add(vertexToPlace);
+            lastOwnMove = newMove;
             return newMove;
         }
         // System.out.println("getBruteForce");
 
         // Found no easy move, do some random stuff and try again
+        lastOwnMove = null;
         return getBruteForceMove(false); // Found no easy move, do some random stuff and try again
     }
 
@@ -397,7 +385,7 @@ public class MixingPlayer implements NewPlayer {
         HashMap<Vertex, Coordinate> mapVertexToCoordinate = gs.getVertexCoordinates();
         mapVertexToCoordinate.put(v, coordinateToAdd);
         betterEdgeCrossingRTree.insertAllCoodinates(gs.getPlacedVertices());
-
+    
         return new GameMove(v, coordinateToAdd);
     }
 
@@ -569,7 +557,7 @@ public class MixingPlayer implements NewPlayer {
 
     @Override
     public void initializeNextRound(Graph g, int width, int height, Role role) {
-
+        
         this.g = g;
         this.width = width;
         this.height = height;
