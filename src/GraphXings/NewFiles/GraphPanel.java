@@ -1,51 +1,201 @@
 package GraphXings.NewFiles;
 
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
+import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.event.*;
 
-public class GraphPanel extends JPanel{
+import GraphXings.Data.Coordinate;
 
-    int img_width = 700;
-    int img_height = 700;
+import java.util.ArrayList;
+import java.util.List;
 
-    int window_width = 500;
-    int window_heigth = 500;
+public class GraphPanel extends JPanel {
 
-    GraphPanel() {
-        this.setPreferredSize(new Dimension(500,500));
-        this.setBorder(new EmptyBorder(150,150,150,150));
-        new BorderLayout(50,50); 
-    }   
+    private List<Coordinate> coordinates;
+    private List<GuiCoordinate> guiCoordinates;
+    private double zoomFactor = 0.2;
+    private Point lastMousePosition;
+    private int panelHeight = 700;
+    private int panelWidth = 700;
+    private  boolean isReady = false;
 
-    public void paint(Graphics g) {
-        BufferedImage bi = new BufferedImage(500,500, BufferedImage.TYPE_INT_ARGB); 
-        Graphics2D g2D = bi.createGraphics();
-        Graphics2D g2D_ui = (Graphics2D) g;
 
-        g2D_ui.setStroke(new BasicStroke(3));
-        g2D_ui.setPaint(Color.BLUE);
-        g2D_ui.drawLine((img_width-window_width)/2, (img_height-window_heigth)/2, (img_width-window_width)/2 + 500, (img_height-window_heigth)/2+500);
-        g2D_ui.drawOval(0, 0, 5, 5);
-        g2D_ui.drawOval(500, 500, 5, 5);
+    public GraphPanel() {
+        this.coordinates = new ArrayList<>();
+        this.guiCoordinates = new ArrayList<>(); // Initialize the new list
+
+            addMouseMotionListener(new MouseMotionAdapter() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if(isReady) {
+                        if (lastMousePosition != null) {
+                            double deltaX = e.getX() - lastMousePosition.getX();
+                            double deltaY = e.getY() - lastMousePosition.getY();
+                            translateView(deltaX, deltaY);
+                            repaint();
+                        }
+                        lastMousePosition = e.getPoint();
+                    }
+                }
+            });
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                     if(isReady) {
+                         lastMousePosition = e.getPoint();
+                     }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if(isReady) {
+                    lastMousePosition = null;
+                    }
+                }
+            });
+
+        addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if(isReady) {
+                // Get the center of the panel
+                Point panelCenter = new Point(panelWidth / 2, panelHeight / 2);
+
+                // Calculate the translation to keep the center fixed
+                int deltaX = (int) ((panelCenter.getX() - getWidth() / 2));
+                int deltaY = (int) ((panelCenter.getY() - getHeight() / 2));
+
+                // Translate the view based on the calculated deltas
+                translateView(deltaX, deltaY);
+
+                // Adjust zoom factor based on mouse wheel movement
+                int notches = e.getWheelRotation();
+                double oldZoomFactor = zoomFactor;
+                zoomFactor -= 0.1 * notches;
+
+                // Calculate the translation to keep the center fixed after zooming
+                int newDeltaX = (int) ((panelCenter.getX() - getWidth() / 2) * (1 - zoomFactor / oldZoomFactor));
+                int newDeltaY = (int) ((panelCenter.getY() - getHeight() / 2) * (1 - zoomFactor / oldZoomFactor));
+
+                // Translate the view based on the new calculated deltas
+                translateView(newDeltaX, newDeltaY);
+                repaint();
+                }
+                
+            }
+        });
+            
         
-        g2D.setStroke(new BasicStroke(3));
-        g2D.setPaint(Color.BLUE);
-        g2D.drawLine(0, 0, 500, 500);
-        g2D.drawOval(0, 0, 5, 5);
-        g2D.drawOval(500, 500, 5, 5);
-
-
-        
-        
-        g2D.dispose();
-        try{ImageIO.write(bi,"png",new File("test.png"));}catch (Exception e) {}
-
     }
 
+    private void translateView(double deltaX, double deltaY) {
+        for (GuiCoordinate guiCoordinate : guiCoordinates) {
+            guiCoordinate.translate(deltaX, deltaY);
+        }
+        updateOriginalCoordinates();
+    }
 
+    private void updateOriginalCoordinates() {
+        coordinates.clear();
+        for (GuiCoordinate guiCoordinate : guiCoordinates) {
+            int x = guiCoordinate.getX();
+            int y = guiCoordinate.getY();
+
+            // Apply zoom factor and translation
+            int scaledX = (int) (x / zoomFactor);
+            int scaledY = (int) (y / zoomFactor);
+
+            coordinates.add(new Coordinate(scaledX, scaledY));
+        }
+    }
+
+    public void changeReadyState(Boolean readyState) {
+        this.isReady = readyState;
+    }
+
+    public void clearPanel() {
+        coordinates.clear();
+        guiCoordinates.clear();
+        repaint();
+    }
+
+    public void setCoordinates(List<Coordinate> coordinates) {
+        this.coordinates = coordinates;
+        updateGuiCoordinates(); // Update guiCoordinates when coordinates change
+        repaint();
+    }
+
+    private void updateGuiCoordinates() {
+        // Update guiCoordinates based on the current zoom and translation
+        guiCoordinates.clear();
+        for (Coordinate coordinate : coordinates) {
+            int x = coordinate.getX();
+            int y = coordinate.getY();
+
+            // Apply zoom factor and translation
+            int scaledX = (int) (x * zoomFactor);
+            int scaledY = (int) (y * zoomFactor);
+
+            guiCoordinates.add(new GuiCoordinate(scaledX, scaledY));
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+
+        // Apply zoom factor to the graphics context
+        g2d.scale(zoomFactor, zoomFactor);
+
+        // Draw your points on the panel
+        for (int i = 0; i < guiCoordinates.size(); i++) {
+            GuiCoordinate guiCoordinate = guiCoordinates.get(i);
+
+            int x = guiCoordinate.getX();
+            int y = guiCoordinate.getY();
+
+            // Adjust the size of the points
+            int scaledPointSize = (int) (10 / zoomFactor);
+
+            // Alternate colors based on the index
+            if (i % 2 == 0) {
+                g2d.setColor(Color.BLUE);
+            } else {
+                g2d.setColor(Color.RED);
+            }
+
+            g2d.fillOval(x - scaledPointSize / 2, y - scaledPointSize / 2, scaledPointSize, scaledPointSize);
+        }
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(panelWidth, panelHeight);
+    }
+
+    private static class GuiCoordinate {
+        private int x;
+        private int y;
+
+        public GuiCoordinate(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void translate(double deltaX, double deltaY) {
+            x += deltaX;
+            y += deltaY;
+        }
+    }
 }

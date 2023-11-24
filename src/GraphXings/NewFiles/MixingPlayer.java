@@ -166,6 +166,9 @@ public class MixingPlayer implements NewPlayer {
         }
         int neighborsStolen = 0;
         for (Vertex vertex : vertexFiFo) {
+            if(g.getIncidentEdges(vertex) == null) {
+                continue;
+            }
             Iterator<Edge> edges = g.getIncidentEdges(vertex).iterator();
             while (edges.hasNext()) {
                 Edge edge = edges.next();

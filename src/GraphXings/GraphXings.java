@@ -10,27 +10,22 @@ import GraphXings.Game.GameInstance.GameInstanceFactory;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
-import GraphXings.NewFiles.DrawGraph;
 import GraphXings.NewFiles.MixingPlayer;
 import GraphXings.NewFiles.MixingPlayer.Strategy;
 
 public class GraphXings {
     public static void main(String[] args) {
 
-        if(1==1) {
-        new DrawGraph();
-        
-        return;
-        }
- 
-
         // global matchup config
         int bestOutOf = 10;
-        int sampleSize = 50;
-        double percentage = 0.93;
+        int sampleSize = 10;
+        double percentage = 0.95;
         Strategy strategy = Strategy.Annealing;
-        NewPlayer player1 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
-        NewPlayer player2 = new NewRandomPlayer("RandomPlayer");
+    
+         NewPlayer player2 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
+         NewPlayer player1 = new NewRandomPlayer("EfficientWinningPlayer1");
+        // NewPlayer player1 = new NewRandomPlayer("EfficientWinningPlayer");
+        
 
         // type of game instanciation (random cycle -> true or constant -> false)
         boolean cycleFactory = false;

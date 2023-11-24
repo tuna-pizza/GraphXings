@@ -1,13 +1,40 @@
 package GraphXings.Game;
 
+import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+
 import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
+import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
+import GraphXings.NewFiles.GraphPanel;
 
 /**
  * A class for managing a game of GraphXings!
  */
 public class NewGame {
+
+	/**
+	 * True: Shows gui
+	 * False: does not show gui
+	 */
+	private Boolean showGui = true;
+
+	/**
+	 * True: a pause between each vertex placement
+	 * False: no pause
+	 */
+	private Boolean timerOn = false; 
+
+	private GraphPanel graphPanel;
+	JFrame frame = new JFrame("Graph Panel");
+	ArrayList<Coordinate> coordinateList = new ArrayList<Coordinate>();	
+	
+
 	/**
 	 * The width of the game board.
 	 */
@@ -33,6 +60,8 @@ public class NewGame {
 	 */
 	private long timeLimit;
 
+	
+
 	/**
 	 * Instantiates a game of GraphXings.
 	 * 
@@ -50,6 +79,18 @@ public class NewGame {
 		this.player1 = player1;
 		this.player2 = player2;
 		this.timeLimit = timeLimit;
+		if(showGui) {
+			this.graphPanel = new GraphPanel();
+			
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			JScrollPane scrollPane = new JScrollPane(graphPanel);
+			scrollPane.setPreferredSize(new Dimension(700, 700));  // Set the initial size of the GraphPane
+			
+			frame.getContentPane().add(scrollPane);
+	
+			frame.pack();
+			frame.setVisible(true);
+		}
 	}
 
 	/**
@@ -58,10 +99,23 @@ public class NewGame {
 	 * @return Provides a GameResult Object containing the game's results.
 	 */
 	public NewGameResult play() {
+		graphPanel.changeReadyState(false);
+
 		try {
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MAX);
 			player2.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MIN);
 			int crossingsGame1 = playRound(player1, player2);
+			if(showGui) {
+				try {
+					graphPanel.clearPanel();
+					coordinateList.clear();
+					Thread.sleep(5000);
+				
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MIN);
 			player2.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MAX);
 			int crossingsGame2 = playRound(player2, player1);
@@ -84,6 +138,7 @@ public class NewGame {
 			} else {
 				return new NewGameResult(0, 0, player1, player2, false, false, false, false);
 			}
+
 		}
 	}
 
@@ -127,12 +182,31 @@ public class NewGame {
 					throw new NewInvalidMoveException(minimizer);
 				}
 			}
+
+		
+
 			gs.applyMove(newMove);
+			if(showGui) {
+				Coordinate c = new Coordinate(gs.getVertexCoordinates().get(newMove.getVertex()).getX(), gs.getVertexCoordinates().get(newMove.getVertex()).getY());
+				coordinateList.add(c);
+				graphPanel.setCoordinates(coordinateList);
+				
+				if(timerOn) {
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+
+			}
 			lastMove = newMove;
 			turn++;
 		}
 		System.out.println((System.nanoTime() - startTime) / 1000000 + "ms");
+		graphPanel.changeReadyState(true);
 		CrossingCalculator cc = new CrossingCalculator(g, gs.getVertexCoordinates());
+		
 		return cc.computeCrossingNumber();
 	}
 }
