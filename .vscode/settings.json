@@ -2,6 +2,8 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "h:\\Downloads\\jar_files (1)\\guava-mini-0.1.4.jar",
-        "h:\\Downloads\\jar_files (1)\\rtree2-0.9.3.jar"
+        "h:\\Downloads\\jar_files (1)\\rtree2-0.9.3.jar",
+        "src/GraphXings/NewFiles/jar/guava-mini-0.1.4.jar",
+        "src/GraphXings/NewFiles/jar/rtree2-0.9.3.jar"
     ]
 }

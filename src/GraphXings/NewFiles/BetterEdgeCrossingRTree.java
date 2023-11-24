@@ -1,7 +1,6 @@
 package GraphXings.NewFiles;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +22,7 @@ import GraphXings.Data.Vertex;
 public class BetterEdgeCrossingRTree {
     Graph g;
     List<Vertex> vertices = new ArrayList<Vertex>();
-    RTree<Edge,Geometry> rTree = RTree.create();
+    RTree<Edge, Geometry> rTree = RTree.create();
 
     public BetterEdgeCrossingRTree(Graph g) {
         this.g = g;
@@ -37,7 +36,8 @@ public class BetterEdgeCrossingRTree {
         vertices = new ArrayList<Vertex>();
         placedVertecies.forEach(vertex -> {
             vertices.add(vertex);
-        });;
+        });
+        ;
 
     }
 
@@ -46,10 +46,10 @@ public class BetterEdgeCrossingRTree {
     }
 
     public int testCoordinate(Vertex vertex, Coordinate coordinateToAdd,
-        HashMap<Vertex, Coordinate> mapVertexToCoordinate) {
+            HashMap<Vertex, Coordinate> mapVertexToCoordinate) {
         mapVertexToCoordinate.put(vertex, coordinateToAdd);
         vertices.add(vertex);
-        int crossingsAddedByVertex = calculateIntersections(mapVertexToCoordinate,vertex);
+        int crossingsAddedByVertex = calculateIntersections(mapVertexToCoordinate, vertex);
         mapVertexToCoordinate.remove(vertex);
         removeCoordinate(vertex);
         return crossingsAddedByVertex;
@@ -59,40 +59,46 @@ public class BetterEdgeCrossingRTree {
         vertices.remove(vertex);
     }
 
-    public void createImg(){
-       rTree.visualize(1000, 1000).save("./images/Graph_" + ".png" );
+    public void createImg() {
+        rTree.visualize(1000, 1000).save("./images/Graph_" + ".png");
     }
 
-    public int calculateIntersections(HashMap<Vertex, Coordinate> mapVertexToCoordinate, Vertex v) {     
+    public int calculateIntersections(HashMap<Vertex, Coordinate> mapVertexToCoordinate, Vertex v) {
         int x1 = 0;
         int y1 = 0;
         int x2 = 0;
         int y2 = 0;
 
         // iterate over the edges adjacent to this vertex
-            for (Edge edge : g.getIncidentEdges(v)) {
-        // for the current edge get the neighbor
+        for (Edge edge : g.getIncidentEdges(v)) {
+            // for the current edge get the neighbor
             Vertex neighbor = v == edge.getS() ? edge.getT() : edge.getS();
             // skip this neighbor if it wasn't placed yet
             if (mapVertexToCoordinate.get(neighbor) == null) {
                 continue;
             }
-            x1 = Integer.min(mapVertexToCoordinate.get(edge.getS()).getX(), mapVertexToCoordinate.get(edge.getT()).getX());
-            y1 = Integer.min(mapVertexToCoordinate.get(edge.getS()).getY(), mapVertexToCoordinate.get(edge.getT()).getY());
-            x2 = Integer.max(mapVertexToCoordinate.get(edge.getS()).getX(), mapVertexToCoordinate.get(edge.getT()).getX());
-            y2 = Integer.max(mapVertexToCoordinate.get(edge.getS()).getY(), mapVertexToCoordinate.get(edge.getT()).getY());
-            rTree = rTree.add(edge ,Geometries.line(mapVertexToCoordinate.get(edge.getS()).getX(),mapVertexToCoordinate.get(edge.getS()).getY(), mapVertexToCoordinate.get(edge.getT()).getX(),mapVertexToCoordinate.get(edge.getT()).getY()));
+            x1 = Integer.min(mapVertexToCoordinate.get(edge.getS()).getX(),
+                    mapVertexToCoordinate.get(edge.getT()).getX());
+            y1 = Integer.min(mapVertexToCoordinate.get(edge.getS()).getY(),
+                    mapVertexToCoordinate.get(edge.getT()).getY());
+            x2 = Integer.max(mapVertexToCoordinate.get(edge.getS()).getX(),
+                    mapVertexToCoordinate.get(edge.getT()).getX());
+            y2 = Integer.max(mapVertexToCoordinate.get(edge.getS()).getY(),
+                    mapVertexToCoordinate.get(edge.getT()).getY());
+            rTree = rTree.add(edge, Geometries.line(mapVertexToCoordinate.get(edge.getS()).getX(),
+                    mapVertexToCoordinate.get(edge.getS()).getY(), mapVertexToCoordinate.get(edge.getT()).getX(),
+                    mapVertexToCoordinate.get(edge.getT()).getY()));
         }
-    
-        Rectangle rectangle = Geometries.rectangle(x1,y1,x2,y2);
-   
+
+        Rectangle rectangle = Geometries.rectangle(x1, y1, x2, y2);
+
         Iterable<Entry<Edge, Geometry>> search = rTree.search(rectangle);
 
         HashSet<Vertex> searchedVertecies = new HashSet<>();
-        
+
         for (Entry<Edge, Geometry> entry : search) {
-         searchedVertecies.add(entry.value().getS());
-         searchedVertecies.add(entry.value().getT());      
+            searchedVertecies.add(entry.value().getS());
+            searchedVertecies.add(entry.value().getT());
         }
 
         int crossings = 0;
@@ -108,8 +114,6 @@ public class BetterEdgeCrossingRTree {
             return Integer.compare(max1, max2);
         };
         TreeSet<Edge> binarySearchTree = new TreeSet<Edge>(comparator);
-
-
 
         for (Vertex vertex : searchedVertecies) {
             // iterate over the edges adjacent to this vertex

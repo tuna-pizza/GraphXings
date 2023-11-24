@@ -13,7 +13,7 @@ public class Game {
     /**
      * Decides whether or not data is copied before being passed on to players.
      */
-    public static boolean safeMode = true;
+    public static boolean safeMode = false;
     /**
      * The width of the game board.
      */
