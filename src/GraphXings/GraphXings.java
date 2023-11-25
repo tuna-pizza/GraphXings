@@ -23,8 +23,8 @@ public class GraphXings {
         int sampleSize = 50;
         double percentage = 0.93;
         Strategy strategy = Strategy.Annealing;
-        NewPlayer player1 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
-        NewPlayer player2 = new NewRandomPlayer("RandomPlayer");
+        NewPlayer player2 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
+        NewPlayer player1 = new NewRandomPlayer("RandomPlayer");
 
         // type of game instanciation (random cycle -> true or constant -> false)
         boolean cycleFactory = false;

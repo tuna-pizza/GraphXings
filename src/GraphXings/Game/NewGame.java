@@ -2,7 +2,6 @@ package GraphXings.Game;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -19,19 +18,29 @@ import GraphXings.NewFiles.GraphPanel;
 public class NewGame {
 
 	/**
-	 * True: Shows gui
-	 * False: does not show gui
+	 * @true: Shows gui
+	 * @false: does not show gui
 	 */
-	private Boolean showGui = true;
+	private boolean showGui = true;
+	/**
+	 * @true: draws edges on graph
+	 * @false: ignores edges on graph
+	 */
+	private boolean drawEdges = true;
+	/**
+	 * @true: a pause between each vertex placement
+	 * @false: no pause
+	 */
+	private boolean timerOn = false; 
 
 	/**
-	 * True: a pause between each vertex placement
-	 * False: no pause
+	 * @true: shows edges in gui
+	 * @false: does not show edges in gui
 	 */
-	private Boolean timerOn = false; 
+	private boolean showEdges = true;
 
 	private GraphPanel graphPanel;
-	JFrame frame = new JFrame("Graph Panel");
+	JFrame frame;
 	ArrayList<Coordinate> coordinateList = new ArrayList<Coordinate>();	
 	
 
@@ -80,6 +89,7 @@ public class NewGame {
 		this.player2 = player2;
 		this.timeLimit = timeLimit;
 		if(showGui) {
+			this.frame = new JFrame("Graph Panel");
 			this.graphPanel = new GraphPanel();
 			
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -100,17 +110,18 @@ public class NewGame {
 	 */
 	public NewGameResult play() {
 		graphPanel.changeReadyState(false);
-
+		graphPanel.showEdges(showEdges);
 		try {
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MAX);
 			player2.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MIN);
 			int crossingsGame1 = playRound(player1, player2);
+			//Between Games
 			if(showGui) {
 				try {
 					Thread.sleep(5000);
+					graphPanel.resetZoom();
 					graphPanel.clearPanel();
 					coordinateList.clear();
-					
 				
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -191,10 +202,14 @@ public class NewGame {
 				Coordinate c = new Coordinate(gs.getVertexCoordinates().get(newMove.getVertex()).getX(), gs.getVertexCoordinates().get(newMove.getVertex()).getY());
 				coordinateList.add(c);
 				graphPanel.setCoordinates(coordinateList);
+
+				if(drawEdges) {
+					graphPanel.setEdges(g, gs.getPlacedVertices(),	gs.getVertexCoordinates());
+				}
 				
 				if(timerOn) {
 					try {
-						Thread.sleep(500);
+						Thread.sleep(50);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.Iterator;
 
-import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Game.GameMove;
 import GraphXings.Game.GameState;

@@ -36,6 +36,14 @@ public class Coordinate
         return y;
     }
 
+    public void translate(int deltaX, int deltaY) {
+        this.x += deltaX;
+        this.y += deltaY;
+    }
+
+
+
+
     /**
      * Decides whether this and the Coordinate other are the same.
      * @param other Another coordinate.

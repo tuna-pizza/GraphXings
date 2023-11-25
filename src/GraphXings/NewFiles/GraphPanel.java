@@ -5,24 +5,42 @@ import java.awt.*;
 import java.awt.event.*;
 
 import GraphXings.Data.Coordinate;
+import GraphXings.Data.Edge;
+import GraphXings.Data.Graph;
+import GraphXings.Data.Vertex;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class GraphPanel extends JPanel {
 
     private List<Coordinate> coordinates;
     private List<GuiCoordinate> guiCoordinates;
-    private double zoomFactor = 1.0;
+    private double zoomFactor;
     private Point lastMousePosition;
     private int panelHeight = 700;
     private int panelWidth = 700;
-    private  boolean isReady = false;
+    /**
+     * 
+     * TODO: isReady fixen
+     */ 
+    private boolean isReady = false;
+    private List<Edge> edges; 
+    private HashMap<Vertex, Coordinate> vertexCoordinateMap;
+    private Graph graph;
+    private HashSet<Vertex> placedVertecies;
+    private boolean showEdges = true;
 
 
     public GraphPanel() {
         this.coordinates = new ArrayList<>();
         this.guiCoordinates = new ArrayList<>();
+        this.edges = new ArrayList<Edge>();
+        this.vertexCoordinateMap = new HashMap<>();
+        this.zoomFactor = 1.0;
 
             addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
@@ -31,10 +49,15 @@ public class GraphPanel extends JPanel {
                         if (lastMousePosition != null) {
                             double deltaX = e.getX() - lastMousePosition.getX();
                             double deltaY = e.getY() - lastMousePosition.getY();
-                            translateView(deltaX, deltaY);
+                            try {
+                                 translateView(deltaX, deltaY);
+                            } catch (ConcurrentModificationException e2) {
+                            }
+                           
                             repaint();
                         }
                         lastMousePosition = e.getPoint();
+                        updateOriginalCoordinates();
                     }
                 }
             });
@@ -55,6 +78,7 @@ public class GraphPanel extends JPanel {
                 }
             });
 
+            
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -63,8 +87,8 @@ public class GraphPanel extends JPanel {
                 Point panelCenter = new Point(panelWidth / 2, panelHeight / 2);
 
                 // Calculate the translation to keep the center fixed
-                int deltaX = (int) ((panelCenter.getX() - getWidth() / 2));
-                int deltaY = (int) ((panelCenter.getY() - getHeight() / 2));
+                int deltaX = (int) ((panelCenter.getX() - panelWidth / 2));
+                int deltaY = (int) ((panelCenter.getY() - panelHeight / 2));
 
                 // Translate the view based on the calculated deltas
                 translateView(deltaX, deltaY);
@@ -72,7 +96,10 @@ public class GraphPanel extends JPanel {
                 // Adjust zoom factor based on mouse wheel movement
                 int notches = e.getWheelRotation();
                 double oldZoomFactor = zoomFactor;
-                zoomFactor -= 0.1 * notches;
+              // Adjust zoom factor based on mouse wheel movement
+
+                zoomFactor -= 0.06 * notches;
+                repaint();
 
                 // Calculate the translation to keep the center fixed after zooming
                 int newDeltaX = (int) ((panelCenter.getX() - getWidth() / 2) * (1 - zoomFactor / oldZoomFactor));
@@ -80,7 +107,8 @@ public class GraphPanel extends JPanel {
 
                 // Translate the view based on the new calculated deltas
                 translateView(newDeltaX, newDeltaY);
-                repaint();
+                setEdges(graph, placedVertecies, vertexCoordinateMap);
+                updateOriginalCoordinates(); // Add this line
                 }
                 
             }
@@ -89,16 +117,27 @@ public class GraphPanel extends JPanel {
         
     }
 
+    public void showEdges(boolean showEdges) {
+        this.showEdges = showEdges;
+    }
+
     private void translateView(double deltaX, double deltaY) {
         try {
             for (GuiCoordinate guiCoordinate : guiCoordinates) {
-            guiCoordinate.translate(deltaX, deltaY);
+                guiCoordinate.translate(deltaX, deltaY);
+            }
+    
+            // Update the coordinates of the vertices based on the translation
+            for (Vertex vertex : placedVertecies) {
+
+                vertexCoordinateMap.get(vertex).translate((int)deltaX, (int)deltaY);
+                
+            }
+    
+            updateOriginalCoordinates();
+        } catch (ConcurrentModificationException e) {
+            
         }
-        updateOriginalCoordinates();
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-       
     }
 
     private void updateOriginalCoordinates() {
@@ -115,7 +154,7 @@ public class GraphPanel extends JPanel {
         }
     }
 
-    public void changeReadyState(Boolean readyState) {
+    public void changeReadyState(boolean readyState) {
         this.isReady = readyState;
     }
 
@@ -131,63 +170,142 @@ public class GraphPanel extends JPanel {
         repaint();
     }
 
+    public void setEdges(List<Edge> edges, Graph g) {
+        this.edges = edges;
+        repaint();
+    }
+
     private void updateGuiCoordinates() {
         try {
-             // Update guiCoordinates based on the current zoom and translation
+            // Update guiCoordinates based on the current zoom and translation
             guiCoordinates.clear();
             for (Coordinate coordinate : coordinates) {
-            int x = coordinate.getX();
-            int y = coordinate.getY();
-
-            // Apply zoom factor and translation
-            int scaledX = (int) (x * zoomFactor);
-            int scaledY = (int) (y * zoomFactor);
-
-            guiCoordinates.add(new GuiCoordinate(scaledX, scaledY));
-        }
+                int x = coordinate.getX();
+                int y = coordinate.getY();
+    
+                // Apply zoom factor and translation
+                int scaledX = (int) (x * zoomFactor);
+                int scaledY = (int) (y * zoomFactor);
+    
+                guiCoordinates.add(new GuiCoordinate(scaledX, scaledY));
+            }
         } catch (Exception e) {
             // TODO: handle exception
         }
-       
     }
+
+    public void setEdges(Graph graph, HashSet<Vertex> placedVertices, HashMap<Vertex, Coordinate> vertexCoordinateMap) {
+        this.vertexCoordinateMap = vertexCoordinateMap;
+        this.graph = graph;
+        this.placedVertecies = placedVertices;
+
+        // Clear the edges list before updating it
+        this.edges.clear();
+
+        for (Vertex v : placedVertices) {
+            if (graph.getIncidentEdges(v) != null) {
+                for (Edge edge : graph.getIncidentEdges(v)) {
+                    edges.add(edge);
+                }
+            }
+        }
+
+        repaint();
+    }   
+
+    private int getHorizontalScrollPosition() {
+        JViewport viewport = getScrollPaneViewport();
+        return (viewport != null) ? viewport.getViewPosition().x : 0;
+    }
+    
+    private int getVerticalScrollPosition() {
+        JViewport viewport = getScrollPaneViewport();
+        return (viewport != null) ? viewport.getViewPosition().y : 0;
+    }
+    
+    private JViewport getScrollPaneViewport() {
+        Container parent = getParent();
+        while (parent != null && !(parent instanceof JScrollPane)) {
+            parent = parent.getParent();
+        }
+        return (parent instanceof JScrollPane) ? ((JScrollPane) parent).getViewport() : null;
+    }
+
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+    
         Graphics2D g2d = (Graphics2D) g;
-
+    
         // Apply zoom factor to the graphics context
         g2d.scale(zoomFactor, zoomFactor);
 
-        // Draw your points on the panel
-        for (int i = 0; i < guiCoordinates.size(); i++) {
-          try {
+          int scaledPointSize = (int) (10 / zoomFactor);
+        if(showEdges) {
+             if (edges != null) {
+           
             try {
-            GuiCoordinate guiCoordinate = guiCoordinates.get(i);
-            int x = guiCoordinate.getX();
-            int y = guiCoordinate.getY();
-                             // Adjust the size of the points
-            int scaledPointSize = (int) (10 / zoomFactor);
+                g2d.setColor(Color.BLACK);
+                for (Edge edge : edges) {
+                int xStart = vertexCoordinateMap.get(edge.getS()).getX();
+                int yStart = vertexCoordinateMap.get(edge.getS()).getY();
+                int xEnd = vertexCoordinateMap.get(edge.getT()).getX();
+                int yEnd = vertexCoordinateMap.get(edge.getT()).getY();
 
-            // Alternate colors based on the index
-            if (i % 2 == 0) {
-                g2d.setColor(Color.BLUE);
-            } else {
-                g2d.setColor(Color.RED);
+                // Adjust the coordinates based on the inverse of the zoom factor
+                xStart = (int) (xStart / zoomFactor);
+                yStart = (int) (yStart / zoomFactor);
+                xEnd = (int) (xEnd / zoomFactor);
+                yEnd = (int) (yEnd / zoomFactor);
+
+                // Adjust the coordinates based on the translation
+                xStart -= getHorizontalScrollPosition();
+                yStart -= getVerticalScrollPosition();
+                xEnd -= getHorizontalScrollPosition();
+                yEnd -= getVerticalScrollPosition();
+                try {
+                     g2d.setStroke(new BasicStroke((int)(1/zoomFactor)));
+                } catch (ConcurrentModificationException e) {
+                    // TODO: handle exception
+                }
+               
+                g2d.drawLine((int)(xStart * zoomFactor) , (int)(yStart * zoomFactor),(int) (xEnd* zoomFactor),(int) (yEnd* zoomFactor));
             }
-
-            g2d.fillOval(x - scaledPointSize / 2, y - scaledPointSize / 2, scaledPointSize, scaledPointSize);
-
             } catch (Exception e) {
                 // TODO: handle exception
             }
-          } catch (IndexOutOfBoundsException e) {
-            // TODO: handle exception
-          } 
-        }
-    }
 
+        }
+        }
+       
+        // Draw your points on the panel
+        for (int i = 0; i < guiCoordinates.size(); i++) {
+            try {
+                GuiCoordinate guiCoordinate = guiCoordinates.get(i);
+                int x = guiCoordinate.getX();
+                int y = guiCoordinate.getY();
+               
+              
+    
+    
+                // Alternate colors based on the index
+                if (i % 2 == 0) {
+                    g2d.setColor(Color.BLUE);
+                } else {
+                    g2d.setColor(Color.RED);
+                }
+    
+                g2d.fillOval(x - scaledPointSize / 2, y - scaledPointSize / 2, scaledPointSize, scaledPointSize);
+    
+            } catch (IndexOutOfBoundsException e) {
+                // TODO: handle exception
+            }
+        }
+        
+    }
+    
+    
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(panelWidth, panelHeight);
@@ -215,4 +333,14 @@ public class GraphPanel extends JPanel {
             y += deltaY;
         }
     }
+
+    public void resetZoom() {
+        zoomFactor = 1.0;
+        lastMousePosition = null;
+        repaint();
+    }
+    
+
+
 }
+
