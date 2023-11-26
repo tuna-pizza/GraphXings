@@ -13,13 +13,11 @@ import GraphXings.Game.Match.NewMatchResult;
 import GraphXings.NewFiles.MixingPlayer;
 import GraphXings.NewFiles.MixingPlayer.Strategy;
 
-
-
 public class GraphXings {
     public static void main(String[] args) {
 
         // global matchup config
-        int bestOutOf = 20;
+        int bestOutOf = 5;
         int sampleSize = 50;
         double percentage = 0.93;
         Strategy strategy = Strategy.Annealing;
@@ -27,12 +25,12 @@ public class GraphXings {
         NewPlayer player1 = new NewRandomPlayer("RandomPlayer");
 
         // type of game instanciation (random cycle -> true or constant -> false)
-        boolean cycleFactory = false;
+        boolean cycleFactory = true;
         // config to generate the graph from cycleFactory
         int seed = 108910;
         boolean includeMatchingEdges = true;
         // config to generate the graph for the constant game only(!)
-        int numberOfVertices = 1000;
+        int numberOfVertices = 5000;
         int width = 1000;
         int height = 1000;
         assert numberOfVertices <= (width * height) : "Graph not possible";
@@ -61,7 +59,7 @@ public class GraphXings {
         }
 
         // play the matchup
-        NewMatch match = new NewMatch(player1, player2, gif, 1/2);
+        NewMatch match = new NewMatch(player1, player2, gif, 1 / 2);
         long startTime = System.nanoTime();
         NewMatchResult mr = match.play();
         long endTime = System.nanoTime();

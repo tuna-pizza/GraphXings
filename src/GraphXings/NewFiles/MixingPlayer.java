@@ -1,6 +1,7 @@
 package GraphXings.NewFiles;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -71,6 +72,11 @@ public class MixingPlayer implements NewPlayer {
      */
     private Strategy strategy;
 
+    private ArrayList<ArrayList<Integer>> heatMap = new ArrayList<ArrayList<Integer>>();;
+    private int heatMapSize = 10;
+    private int nMovesSize = 10;
+    private ArrayList<Vertex> lastNVertices = new ArrayList<>();
+
     public MixingPlayer(String name) {
         this.name = name;
         this.sampleSize = 50;
@@ -102,12 +108,21 @@ public class MixingPlayer implements NewPlayer {
         return makeMove(lastMove, false);
     }
 
+    public void addToHeatmap(Coordinate coordinate) {
+        int heatMapX = (int) ((double) coordinate.getX() / width * heatMapSize);
+        int heatMapY = (int) ((double) coordinate.getY() / height * heatMapSize);
+        heatMap.get(heatMapX).set(heatMapY, heatMap.get(heatMapX).get(heatMapY) + 1);
+    }
+
     public GameMove makeMove(GameMove lastMove, boolean maximize) {
         // First: Apply the last move by the opponent to the local GameState (and the
         // Crossing Calculator)
         if (lastMove != null) {
             gs.applyMove(lastMove);
+            addToHeatmap(lastMove.getCoordinate());
+            updateFiFo(lastMove);
             betterEdgeCrossingRTree.insertVertex(lastMove.getVertex());
+
         }
         // Second: Compute the new move.
         GameMove newMove = getMove(lastMove, maximize);
@@ -115,6 +130,8 @@ public class MixingPlayer implements NewPlayer {
         // Calculator)
         gs.applyMove(newMove);
         betterEdgeCrossingRTree.insertVertex(newMove.getVertex());
+        addToHeatmap(newMove.getCoordinate());
+        updateFiFo(newMove);
         // Finally: Return the new move.
         return newMove;
     }
@@ -125,12 +142,12 @@ public class MixingPlayer implements NewPlayer {
             // System.out.print(progress);
             switch (strategy) {
                 case BruteForce:
-                    return getBruteForceMove(maximize);
+                    return getBruteForceMove(maximize, lastMove);
                 case Mirroring:
                     return getMirroringMove(lastMove);
                 case Percentage:
                     if (r.nextDouble() < percentage) {
-                        return getBruteForceMove(maximize);
+                        return getBruteForceMove(maximize, lastMove);
                     } else {
                         return getMirroringMove(lastMove);
                     }
@@ -138,11 +155,11 @@ public class MixingPlayer implements NewPlayer {
                     if ((double) gs.getPlacedVertices().size() / g.getN() < percentage) {
                         return getMirroringMove(lastMove);
                     } else {
-                        return getBruteForceMove(maximize);
+                        return getBruteForceMove(maximize, lastMove);
                     }
                 case AnnealingReverse:
                     if ((double) gs.getPlacedVertices().size() / g.getN() < percentage) {
-                        return getBruteForceMove(maximize);
+                        return getBruteForceMove(maximize, lastMove);
                     } else {
                         return getMirroringMove(lastMove);
                     }
@@ -150,49 +167,48 @@ public class MixingPlayer implements NewPlayer {
                     return getRandomMove();
             }
         } else {
-            return getMinimizingMove();
+            return getMinimizingMove(lastMove);
         }
     }
 
-    public Boolean enemyCounterMinimzer() {
-        int numberOfMovesToCheck = 10;
-        ArrayList<Vertex> vertexFiFo = new ArrayList<>();
-        for (Vertex vertex : gs.getPlacedVertices()) {
-            if (vertexFiFo.size() >= numberOfMovesToCheck) {
-                vertexFiFo.remove(0);
-            }
-            vertexFiFo.add(vertex);
+    private void updateFiFo(GameMove moveToAdd) {
+        if (lastNVertices.size() >= nMovesSize) {
+            lastNVertices.remove(0);
         }
+        lastNVertices.add(moveToAdd.getVertex());
+    }
+
+    private Boolean enemyCounterMinimzer() {
         int neighborsStolen = 0;
-        for (Vertex vertex : vertexFiFo) {
-            if(g.getIncidentEdges(vertex) == null) {
+        for (Vertex vertex : lastNVertices) {
+            if (g.getIncidentEdges(vertex) == null) {
                 continue;
             }
             Iterator<Edge> edges = g.getIncidentEdges(vertex).iterator();
             while (edges.hasNext()) {
                 Edge edge = edges.next();
                 Vertex vertexToCheck = edge.getS() != vertex ? edge.getS() : edge.getT();
-                if (vertexFiFo.contains(vertexToCheck)) {
+                if (lastNVertices.contains(vertexToCheck)) {
                     neighborsStolen++;
                 }
             }
         }
-        if (neighborsStolen > (numberOfMovesToCheck / 1.5)) {
+        if (neighborsStolen > (nMovesSize / 1.5)) {
             return true;
         }
         return false;
     }
 
-    public GameMove getMinimizingMove() {
+    public GameMove getMinimizingMove(GameMove lastMove) {
         Vertex vertexToPlace;
         GameMove newMove = null;
         // If the enemy tries to counter our method by always placing our neighbours we
         // return to random playing
 
-        // if (enemyCounterMinimzer()) {
-        //     lastOwnMove = null;
-        //     return getBruteForceMove(false);
-        // }
+        if (enemyCounterMinimzer()) {
+            lastOwnMove = null;
+            return getBruteForceMove(false, lastMove);
+        }
 
         if (lastOwnMove != null) {
             // System.out.println("lastOwnMove != null");
@@ -223,11 +239,11 @@ public class MixingPlayer implements NewPlayer {
                     } else {// left column
                         // System.out.print("else");
                         while (true) {
-                            if (lastX < width - 1 && gs.getUsedCoordinates()[lastX + 1][lastY] == 0) {
-                                newMove = new GameMove(vertexToPlace, new Coordinate(lastX + 1, lastY));
-                                break;
-                            } else if (lastY > 0 && gs.getUsedCoordinates()[lastX][lastY - 1] == 0) {
+                            if (lastY > 0 && gs.getUsedCoordinates()[lastX][lastY - 1] == 0) {
                                 newMove = new GameMove(vertexToPlace, new Coordinate(lastX, lastY - 1));
+                                break;
+                            } else if (lastX < width - 1 && gs.getUsedCoordinates()[lastX + 1][lastY] == 0) {
+                                newMove = new GameMove(vertexToPlace, new Coordinate(lastX + 1, lastY));
                                 break;
                             } else {
                                 lastX++;
@@ -262,11 +278,11 @@ public class MixingPlayer implements NewPlayer {
                     } else {// Right column
                         // System.out.print("else");
                         while (true) {
-                            if (lastX > 0 && gs.getUsedCoordinates()[lastX - 1][lastY] == 0) {
-                                newMove = new GameMove(vertexToPlace, new Coordinate(lastX - 1, lastY));
-                                break;
-                            } else if (lastY < height - 1 && gs.getUsedCoordinates()[lastX][lastY + 1] == 0) {
+                            if (lastY < height - 1 && gs.getUsedCoordinates()[lastX][lastY + 1] == 0) {
                                 newMove = new GameMove(vertexToPlace, new Coordinate(lastX, lastY + 1));
+                                break;
+                            } else if (lastX > 0 && gs.getUsedCoordinates()[lastX - 1][lastY] == 0) {
+                                newMove = new GameMove(vertexToPlace, new Coordinate(lastX - 1, lastY));
                                 break;
                             } else {
                                 lastX--;
@@ -335,27 +351,71 @@ public class MixingPlayer implements NewPlayer {
 
         // Found no easy move, do some random stuff and try again
         lastOwnMove = null;
-        return getBruteForceMove(false); // Found no easy move, do some random stuff and try again
+        return getBruteForceMove(false, lastMove); // Found no easy move, do some random stuff and try again
     }
 
-    public GameMove getBruteForceMove(boolean maximize) {
+    public GameMove getBruteForceMove(boolean maximize, GameMove lastMove) {
         // get the first vertex that is not yet placed
         Vertex v = null;
-        for (Vertex v_ : g.getVertices()) {
-            if (!gs.getPlacedVertices().contains(v_)) {
-                v = v_;
-                break;
+        ArrayList<Vertex> vertices = new ArrayList<>();
+        if (lastMove != null)
+            vertices = getUnplacedNeighbors(lastMove.getVertex());
+        if (vertices.size() == 0) {
+
+            for (Vertex v_ : g.getVertices()) {
+                if (!gs.getPlacedVertices().contains(v_)) {
+                    v = v_;
+                    break;
+                }
+            }
+        } else {
+            v = vertices.get(0);
+        }
+
+        // Find optimal heatmap square
+        int minVal = Integer.MAX_VALUE;
+        int maxVal = Integer.MIN_VALUE;
+        int minRow = -1, minCol = -1, maxRow = -1, maxCol = -1;
+
+        for (int i = 0; i < heatMap.size(); i++) {
+            for (int j = 0; j < heatMap.get(i).size(); j++) {
+                int val = heatMap.get(i).get(j);
+                if (val < minVal) {
+                    minVal = val;
+                    minRow = j;
+                    minCol = i;
+                }
+                if (val > maxVal) {
+                    maxVal = val;
+                    maxRow = j;
+                    maxCol = i;
+                }
             }
         }
 
-        // Number of crossings before we place the vertex
-        int bestCrossingsAddedByVertex = maximize ? -9999999 : 9999999;
-        int bestSample = 0;
+        int bestSquareX = maximize ? minCol : maxCol;
+        int bestSquareY = maximize ? minRow : maxRow;
 
         ArrayList<Integer> xPositions = new ArrayList<Integer>();
         ArrayList<Integer> yPositions = new ArrayList<Integer>();
-        // Create sample set of possible placing positions of the current vertex v
-        for (int sample = 0; sample < sampleSize; sample++) {
+
+        // Create sample set based on the lowest/highest vertex density area
+        // Using abort in case of areas being completly filled, chose a reasonable(?)
+        // value
+        for (int sample = 0, abort = 0; sample < sampleSize / 2 && abort < 200; sample++, abort++) {
+            int x = r.nextInt(width / heatMapSize) + bestSquareX * (width / heatMapSize);
+            int y = r.nextInt(height / heatMapSize) + bestSquareY * (height / heatMapSize);
+            if (gs.getUsedCoordinates()[x][y] != 0) {
+                sample--;
+            } else {
+                xPositions.add(x);
+                yPositions.add(y);
+            }
+        }
+
+        // Create random sample set of possible placing positions of the current vertex
+        // v
+        for (int sample = 0; sample < sampleSize / 2; sample++) {
             int x = r.nextInt(width);
             int y = r.nextInt(height);
             if (gs.getUsedCoordinates()[x][y] != 0) { // The random coordinate is already taken
@@ -366,6 +426,9 @@ public class MixingPlayer implements NewPlayer {
             }
         }
 
+        // Number of crossings before we place the vertex
+        int bestTotalCrossingsByVertex = maximize ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestSample = 0;
         // Find best position (maximizing crossings) we can place vertex v at
         for (int sample = 0; sample < sampleSize; sample++) {
             if (gs.getUsedCoordinates()[xPositions.get(sample)][yPositions.get(sample)] != 0)
@@ -373,10 +436,10 @@ public class MixingPlayer implements NewPlayer {
             Coordinate coordinateToAdd = new Coordinate(xPositions.get(sample), yPositions.get(sample));
             int crossingsAddedByVertex = betterEdgeCrossingRTree.testCoordinate(v, coordinateToAdd,
                     gs.getVertexCoordinates());
-            if (maximize ? crossingsAddedByVertex > bestCrossingsAddedByVertex
-                    : crossingsAddedByVertex < bestCrossingsAddedByVertex) {
+            if (maximize ? crossingsAddedByVertex > bestTotalCrossingsByVertex
+                    : crossingsAddedByVertex < bestTotalCrossingsByVertex) {
                 bestSample = sample;
-                bestCrossingsAddedByVertex = crossingsAddedByVertex;
+                bestTotalCrossingsByVertex = crossingsAddedByVertex;
             }
         }
 
@@ -384,7 +447,7 @@ public class MixingPlayer implements NewPlayer {
         HashMap<Vertex, Coordinate> mapVertexToCoordinate = gs.getVertexCoordinates();
         mapVertexToCoordinate.put(v, coordinateToAdd);
         betterEdgeCrossingRTree.insertAllCoodinates(gs.getPlacedVertices());
-    
+
         return new GameMove(v, coordinateToAdd);
     }
 
@@ -556,12 +619,16 @@ public class MixingPlayer implements NewPlayer {
 
     @Override
     public void initializeNextRound(Graph g, int width, int height, Role role) {
-        
         this.g = g;
         this.width = width;
         this.height = height;
         this.gs = new GameState(width, height);
         this.betterEdgeCrossingRTree = new BetterEdgeCrossingRTree(g);
+        heatMap = new ArrayList<ArrayList<Integer>>();
+        lastNVertices = new ArrayList<>();
+        for (int i = 0; i < heatMapSize; i++) {
+            heatMap.add(new ArrayList<Integer>(Collections.nCopies(heatMapSize, 0)));
+        }
 
         for (Vertex vertex : g.getVertices()) {
             this.mapIdToVertex.put(vertex.getId(), vertex);
