@@ -21,7 +21,7 @@ public class NewGame {
 	 * @true: Shows gui
 	 * @false: does not show gui
 	 */
-	private boolean showGui = false;
+	private boolean showGui = true;
 	/**
 	 * @true: draws edges on graph
 	 * @false: ignores edges on graph
@@ -33,6 +33,7 @@ public class NewGame {
 	 */
 	private boolean timerOn = false; 
 	private int sleepTimer = 200; //in miliseconds
+	private int pauseBetweenGames = 100; //in milis
 	/**
 	 * @true: shows edges in gui
 	 * @false: does not show edges in gui
@@ -91,13 +92,10 @@ public class NewGame {
 		if(showGui) {
 			this.frame = new JFrame("Graph Panel");
 			this.graphPanel = new GraphPanel();
-			
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			JScrollPane scrollPane = new JScrollPane(graphPanel);
 			scrollPane.setPreferredSize(new Dimension(700, 700));  // Set the initial size of the GraphPane
-			
 			frame.getContentPane().add(scrollPane);
-	
 			frame.pack();
 			frame.setVisible(true);
 		}
@@ -120,7 +118,7 @@ public class NewGame {
 			//Between Games
 			if(showGui) {
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(pauseBetweenGames);
 					graphPanel.resetZoom();
 					graphPanel.clearPanel();
 					coordinateList.clear();

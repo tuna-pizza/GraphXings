@@ -32,7 +32,7 @@ public class GraphPanel extends JPanel {
     private HashMap<Vertex, Coordinate> vertexCoordinateMap;
     private Graph graph;
     private HashSet<Vertex> placedVertecies;
-    private boolean showEdges = true;
+    private boolean showEdges = false;
 
 
     public GraphPanel() {
@@ -40,7 +40,7 @@ public class GraphPanel extends JPanel {
         this.guiCoordinates = new ArrayList<>();
         this.edges = new ArrayList<Edge>();
         this.vertexCoordinateMap = new HashMap<>();
-        this.zoomFactor = 1.0;
+        this.zoomFactor = 0.3;
 
             addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
@@ -126,16 +126,19 @@ public class GraphPanel extends JPanel {
             for (GuiCoordinate guiCoordinate : guiCoordinates) {
                 guiCoordinate.translate(deltaX, deltaY);
             }
-    
+            
+            if(showEdges) {
             // Update the coordinates of the vertices based on the translation
             for (Vertex vertex : placedVertecies) {
 
                 vertexCoordinateMap.get(vertex).translate((int)deltaX, (int)deltaY);
                 
             }
+            }
+          
     
             updateOriginalCoordinates();
-        } catch (ConcurrentModificationException e) {
+        } catch (ConcurrentModificationException | NullPointerException e ) {
             
         }
     }
@@ -201,14 +204,18 @@ public class GraphPanel extends JPanel {
 
         // Clear the edges list before updating it
         this.edges.clear();
-
-        for (Vertex v : placedVertices) {
+        try {
+            for (Vertex v : placedVertices) {
             if (graph.getIncidentEdges(v) != null) {
                 for (Edge edge : graph.getIncidentEdges(v)) {
                     edges.add(edge);
                 }
             }
         }
+        } catch (NullPointerException e) {
+            
+        }
+       
 
         repaint();
     }   
@@ -285,10 +292,7 @@ public class GraphPanel extends JPanel {
                 GuiCoordinate guiCoordinate = guiCoordinates.get(i);
                 int x = guiCoordinate.getX();
                 int y = guiCoordinate.getY();
-               
-              
-    
-    
+
                 // Alternate colors based on the index
                 if (i % 2 == 0) {
                     g2d.setColor(Color.BLUE);
@@ -298,7 +302,7 @@ public class GraphPanel extends JPanel {
     
                 g2d.fillOval(x - scaledPointSize / 2, y - scaledPointSize / 2, scaledPointSize, scaledPointSize);
     
-            } catch (IndexOutOfBoundsException e) {
+            } catch (IndexOutOfBoundsException | NullPointerException e) {
                 // TODO: handle exception
             }
         }

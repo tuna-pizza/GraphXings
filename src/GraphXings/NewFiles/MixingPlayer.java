@@ -193,7 +193,7 @@ public class MixingPlayer implements NewPlayer {
                 }
             }
         }
-        if (neighborsStolen > (nMovesSize / 1.5)) {
+        if (neighborsStolen > (nMovesSize / 1)) {
             return true;
         }
         return false;

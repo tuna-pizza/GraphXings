@@ -12,6 +12,7 @@ import GraphXings.Game.Match.NewMatch;
 import GraphXings.Game.Match.NewMatchResult;
 import GraphXings.NewFiles.MixingPlayer;
 import GraphXings.NewFiles.MixingPlayer.Strategy;
+import GraphXings.otherCode.Gruppe8.*;
 
 public class GraphXings {
     public static void main(String[] args) {
@@ -21,16 +22,16 @@ public class GraphXings {
         int sampleSize = 50;
         double percentage = 0.93;
         Strategy strategy = Strategy.Annealing;
-        NewPlayer player2 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
-        NewPlayer player1 = new NewRandomPlayer("RandomPlayer");
+        NewPlayer player1 = new MixingPlayer("MixingPlayer", sampleSize, percentage, strategy);
+        NewPlayer player2 = new EfficientWinningPlayer("Group8");
 
         // type of game instanciation (random cycle -> true or constant -> false)
-        boolean cycleFactory = true;
+        boolean cycleFactory = false;
         // config to generate the graph from cycleFactory
         int seed = 108910;
         boolean includeMatchingEdges = true;
         // config to generate the graph for the constant game only(!)
-        int numberOfVertices = 5000;
+        int numberOfVertices = 1500;
         int width = 1000;
         int height = 1000;
         assert numberOfVertices <= (width * height) : "Graph not possible";
