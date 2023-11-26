@@ -21,18 +21,18 @@ public class NewGame {
 	 * @true: Shows gui
 	 * @false: does not show gui
 	 */
-	private boolean showGui = true;
+	private boolean showGui = false;
 	/**
 	 * @true: draws edges on graph
 	 * @false: ignores edges on graph
 	 */
-	private boolean drawEdges = true;
+	private boolean drawEdges = false;
 	/**
 	 * @true: a pause between each vertex placement
 	 * @false: no pause
 	 */
 	private boolean timerOn = false; 
-
+	private int sleepTimer = 200; //in miliseconds
 	/**
 	 * @true: shows edges in gui
 	 * @false: does not show edges in gui
@@ -109,8 +109,10 @@ public class NewGame {
 	 * @return Provides a GameResult Object containing the game's results.
 	 */
 	public NewGameResult play() {
-		graphPanel.changeReadyState(false);
-		graphPanel.showEdges(showEdges);
+		if(showGui) {
+			graphPanel.changeReadyState(false);
+			graphPanel.showEdges(showEdges);
+		}
 		try {
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MAX);
 			player2.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MIN);
@@ -209,7 +211,7 @@ public class NewGame {
 				
 				if(timerOn) {
 					try {
-						Thread.sleep(50);
+						Thread.sleep(sleepTimer);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
