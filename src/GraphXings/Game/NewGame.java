@@ -22,23 +22,19 @@ public class NewGame {
 	 * @false: does not show gui
 	 */
 	private boolean showGui = true;
-	/**
-	 * @true: draws edges on graph
-	 * @false: ignores edges on graph
-	 */
-	private boolean drawEdges = false;
+
 	/**
 	 * @true: a pause between each vertex placement
 	 * @false: no pause
 	 */
 	private boolean timerOn = false; 
 	private int sleepTimer = 200; //in miliseconds
-	private int pauseBetweenGames = 100; //in milis
+	private int pauseBetweenGames = 5000; //in milis
 	/**
 	 * @true: shows edges in gui
 	 * @false: does not show edges in gui
 	 */
-	private boolean showEdges = true;
+	private boolean showEdges = false;
 
 	private GraphPanel graphPanel;
 	JFrame frame;
@@ -108,8 +104,8 @@ public class NewGame {
 	 */
 	public NewGameResult play() {
 		if(showGui) {
-			graphPanel.changeReadyState(false);
 			graphPanel.showEdges(showEdges);
+			graphPanel.changeReadyState(false);	
 		}
 		try {
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MAX);
@@ -124,8 +120,10 @@ public class NewGame {
 					coordinateList.clear();
 				
 				} catch (InterruptedException e) {
+					graphPanel.changeReadyState(false);	
 					e.printStackTrace();
 				}
+				graphPanel.changeReadyState(false);	
 			}
 			
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MIN);
@@ -198,12 +196,12 @@ public class NewGame {
 		
 
 			gs.applyMove(newMove);
-			if(showGui) {
+			if(showGui == true) {
 				Coordinate c = new Coordinate(gs.getVertexCoordinates().get(newMove.getVertex()).getX(), gs.getVertexCoordinates().get(newMove.getVertex()).getY());
 				coordinateList.add(c);
 				graphPanel.setCoordinates(coordinateList);
 
-				if(drawEdges) {
+				if(showEdges == true) {
 					graphPanel.setEdges(g, gs.getPlacedVertices(),	gs.getVertexCoordinates());
 				}
 				

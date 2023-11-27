@@ -32,7 +32,7 @@ public class GraphPanel extends JPanel {
     private HashMap<Vertex, Coordinate> vertexCoordinateMap;
     private Graph graph;
     private HashSet<Vertex> placedVertecies;
-    private boolean showEdges = false;
+    private boolean showEdges = true;
 
 
     public GraphPanel() {
@@ -40,12 +40,12 @@ public class GraphPanel extends JPanel {
         this.guiCoordinates = new ArrayList<>();
         this.edges = new ArrayList<Edge>();
         this.vertexCoordinateMap = new HashMap<>();
-        this.zoomFactor = 0.3;
+        this.zoomFactor = 1.0;
 
             addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    if(isReady) {
+                    if(isReady == true) {
                         if (lastMousePosition != null) {
                             double deltaX = e.getX() - lastMousePosition.getX();
                             double deltaY = e.getY() - lastMousePosition.getY();
@@ -65,14 +65,14 @@ public class GraphPanel extends JPanel {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                     if(isReady) {
+                     if(isReady == true) {
                          lastMousePosition = e.getPoint();
                      }
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if(isReady) {
+                    if(isReady == true) {
                     lastMousePosition = null;
                     }
                 }
@@ -82,7 +82,7 @@ public class GraphPanel extends JPanel {
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                if(isReady) {
+                if(isReady == true) {
                 // Get the center of the panel
                 Point panelCenter = new Point(panelWidth / 2, panelHeight / 2);
 
@@ -127,14 +127,16 @@ public class GraphPanel extends JPanel {
                 guiCoordinate.translate(deltaX, deltaY);
             }
             
-            if(showEdges) {
-            // Update the coordinates of the vertices based on the translation
-            for (Vertex vertex : placedVertecies) {
+            if(showEdges == true) {
+                // Update the coordinates of the vertices based on the translation
+                for (Vertex vertex : placedVertecies) {
 
-                vertexCoordinateMap.get(vertex).translate((int)deltaX, (int)deltaY);
-                
+                    vertexCoordinateMap.get(vertex).translate((int)deltaX, (int)deltaY);
+                    
+                }
             }
-            }
+          
+            
           
     
             updateOriginalCoordinates();
@@ -145,7 +147,8 @@ public class GraphPanel extends JPanel {
 
     private void updateOriginalCoordinates() {
         coordinates.clear();
-        for (GuiCoordinate guiCoordinate : guiCoordinates) {
+        try {
+            for (GuiCoordinate guiCoordinate : guiCoordinates) {
             int x = guiCoordinate.getX();
             int y = guiCoordinate.getY();
 
@@ -155,6 +158,10 @@ public class GraphPanel extends JPanel {
 
             coordinates.add(new Coordinate(scaledX, scaledY));
         }
+        } catch (ConcurrentModificationException e) {
+            // TODO: handle exception
+        }
+        
     }
 
     public void changeReadyState(boolean readyState) {
@@ -198,27 +205,27 @@ public class GraphPanel extends JPanel {
     }
 
     public void setEdges(Graph graph, HashSet<Vertex> placedVertices, HashMap<Vertex, Coordinate> vertexCoordinateMap) {
+        this.edges.clear();
         this.vertexCoordinateMap = vertexCoordinateMap;
         this.graph = graph;
         this.placedVertecies = placedVertices;
-
+    
         // Clear the edges list before updating it
-        this.edges.clear();
+        
         try {
             for (Vertex v : placedVertices) {
-            if (graph.getIncidentEdges(v) != null) {
-                for (Edge edge : graph.getIncidentEdges(v)) {
-                    edges.add(edge);
+                if (graph.getIncidentEdges(v) != null) {
+                    for (Edge edge : graph.getIncidentEdges(v)) {
+                        edges.add(edge);
+                    }
                 }
             }
-        }
         } catch (NullPointerException e) {
-            
-        }
-       
 
-        repaint();
-    }   
+        }
+    
+        repaint();  // Make sure to repaint after updating the edges
+    }
 
     private int getHorizontalScrollPosition() {
         JViewport viewport = getScrollPaneViewport();
@@ -248,39 +255,32 @@ public class GraphPanel extends JPanel {
         // Apply zoom factor to the graphics context
         g2d.scale(zoomFactor, zoomFactor);
 
-          int scaledPointSize = (int) (10 / zoomFactor);
-        if(showEdges) {
+        int scaledPointSize = (int) (10 / zoomFactor);
+        if(showEdges == true) {
+            System.out.println("Shows Edges");
              if (edges != null) {
-           
-            try {
                 g2d.setColor(Color.BLACK);
                 for (Edge edge : edges) {
-                int xStart = vertexCoordinateMap.get(edge.getS()).getX();
-                int yStart = vertexCoordinateMap.get(edge.getS()).getY();
-                int xEnd = vertexCoordinateMap.get(edge.getT()).getX();
-                int yEnd = vertexCoordinateMap.get(edge.getT()).getY();
+                    int xStart = vertexCoordinateMap.get(edge.getS()).getX();
+                    int yStart = vertexCoordinateMap.get(edge.getS()).getY();
+                    int xEnd = vertexCoordinateMap.get(edge.getT()).getX();
+                    int yEnd = vertexCoordinateMap.get(edge.getT()).getY();
 
-                // Adjust the coordinates based on the inverse of the zoom factor
-                xStart = (int) (xStart / zoomFactor);
-                yStart = (int) (yStart / zoomFactor);
-                xEnd = (int) (xEnd / zoomFactor);
-                yEnd = (int) (yEnd / zoomFactor);
+                    // Adjust the coordinates based on the inverse of the zoom factor
+                    xStart = (int) (xStart / zoomFactor);
+                    yStart = (int) (yStart / zoomFactor);
+                    xEnd = (int) (xEnd / zoomFactor);
+                    yEnd = (int) (yEnd / zoomFactor);
 
-                // Adjust the coordinates based on the translation
-                xStart -= getHorizontalScrollPosition();
-                yStart -= getVerticalScrollPosition();
-                xEnd -= getHorizontalScrollPosition();
-                yEnd -= getVerticalScrollPosition();
-                try {
-                     g2d.setStroke(new BasicStroke((int)(1/zoomFactor)));
-                } catch (ConcurrentModificationException e) {
-                    // TODO: handle exception
-                }
-               
-                g2d.drawLine((int)(xStart * zoomFactor) , (int)(yStart * zoomFactor),(int) (xEnd* zoomFactor),(int) (yEnd* zoomFactor));
-            }
-            } catch (Exception e) {
-                // TODO: handle exception
+                    // Adjust the coordinates based on the translation
+                    xStart -= getHorizontalScrollPosition();
+                    yStart -= getVerticalScrollPosition();
+                    xEnd -= getHorizontalScrollPosition();
+                    yEnd -= getVerticalScrollPosition();
+
+                    g2d.setStroke(new BasicStroke((int)(1/zoomFactor)));
+                
+                    g2d.drawLine((int)(xStart * zoomFactor) , (int)(yStart * zoomFactor),(int) (xEnd* zoomFactor),(int) (yEnd* zoomFactor));
             }
 
         }

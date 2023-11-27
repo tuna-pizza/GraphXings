@@ -60,7 +60,7 @@ public class GraphXings {
         }
 
         // play the matchup
-        NewMatch match = new NewMatch(player1, player2, gif, 1 / 2);
+        NewMatch match = new NewMatch(player1, player2, gif, 1);
         long startTime = System.nanoTime();
         NewMatchResult mr = match.play();
         long endTime = System.nanoTime();
