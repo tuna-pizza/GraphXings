@@ -79,7 +79,7 @@ public class MixingPlayer implements NewPlayer {
 
     public MixingPlayer(String name) {
         this.name = name;
-        this.sampleSize = 50;
+        this.sampleSize = 30;
         this.percentage = 0.93;
         this.strategy = Strategy.Annealing;
     }

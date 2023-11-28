@@ -27,14 +27,14 @@ public class NewGame {
 	 * @true: a pause between each vertex placement
 	 * @false: no pause
 	 */
-	private boolean timerOn = false; 
-	private int sleepTimer = 200; //in miliseconds
+	private boolean timerOn = true; 
+	private int sleepTimer = 0; //in miliseconds
 	private int pauseBetweenGames = 5000; //in milis
 	/**
 	 * @true: shows edges in gui
 	 * @false: does not show edges in gui
 	 */
-	private boolean showEdges = false;
+	private boolean setEdges = true;
 
 	private GraphPanel graphPanel;
 	JFrame frame;
@@ -104,7 +104,7 @@ public class NewGame {
 	 */
 	public NewGameResult play() {
 		if(showGui) {
-			graphPanel.showEdges(showEdges);
+			graphPanel.showEdges(setEdges);
 			graphPanel.changeReadyState(false);	
 		}
 		try {
@@ -192,16 +192,14 @@ public class NewGame {
 					throw new NewInvalidMoveException(minimizer);
 				}
 			}
-
-		
-
+			
 			gs.applyMove(newMove);
 			if(showGui == true) {
 				Coordinate c = new Coordinate(gs.getVertexCoordinates().get(newMove.getVertex()).getX(), gs.getVertexCoordinates().get(newMove.getVertex()).getY());
 				coordinateList.add(c);
 				graphPanel.setCoordinates(coordinateList);
 
-				if(showEdges == true) {
+				if(setEdges == true) {
 					graphPanel.setEdges(g, gs.getPlacedVertices(),	gs.getVertexCoordinates());
 				}
 				
@@ -218,9 +216,10 @@ public class NewGame {
 			turn++;
 		}
 		System.out.println((System.nanoTime() - startTime) / 1000000 + "ms");
-		graphPanel.changeReadyState(true);
+		if(showGui == true) {
+			graphPanel.changeReadyState(true);
+		}
 		CrossingCalculator cc = new CrossingCalculator(g, gs.getVertexCoordinates());
-		
 		return cc.computeCrossingNumber();
 	}
 }

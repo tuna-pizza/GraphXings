@@ -32,7 +32,7 @@ public class GraphPanel extends JPanel {
     private HashMap<Vertex, Coordinate> vertexCoordinateMap;
     private Graph graph;
     private HashSet<Vertex> placedVertecies;
-    private boolean showEdges = true;
+    private boolean showEdges = false;
 
 
     public GraphPanel() {
@@ -126,19 +126,11 @@ public class GraphPanel extends JPanel {
             for (GuiCoordinate guiCoordinate : guiCoordinates) {
                 guiCoordinate.translate(deltaX, deltaY);
             }
-            
             if(showEdges == true) {
-                // Update the coordinates of the vertices based on the translation
                 for (Vertex vertex : placedVertecies) {
-
                     vertexCoordinateMap.get(vertex).translate((int)deltaX, (int)deltaY);
-                    
                 }
             }
-          
-            
-          
-    
             updateOriginalCoordinates();
         } catch (ConcurrentModificationException | NullPointerException e ) {
             
@@ -180,11 +172,6 @@ public class GraphPanel extends JPanel {
         repaint();
     }
 
-    public void setEdges(List<Edge> edges, Graph g) {
-        this.edges = edges;
-        repaint();
-    }
-
     private void updateGuiCoordinates() {
         try {
             // Update guiCoordinates based on the current zoom and translation
@@ -205,25 +192,26 @@ public class GraphPanel extends JPanel {
     }
 
     public void setEdges(Graph graph, HashSet<Vertex> placedVertices, HashMap<Vertex, Coordinate> vertexCoordinateMap) {
-        this.edges.clear();
-        this.vertexCoordinateMap = vertexCoordinateMap;
+        edges.clear();
         this.graph = graph;
+        this.vertexCoordinateMap = vertexCoordinateMap;
         this.placedVertecies = placedVertices;
-    
-        // Clear the edges list before updating it
-        
-        try {
-            for (Vertex v : placedVertices) {
-                if (graph.getIncidentEdges(v) != null) {
-                    for (Edge edge : graph.getIncidentEdges(v)) {
+            for(Vertex v : placedVertices) {
+                if(v!=null){
+                    if(graph.getIncidentEdges(v)!= null) {
+                        for (Edge edge : graph.getIncidentEdges(v)) {
+                        // for the current edge get the neighbor
+                        Vertex neighbor = v == edge.getS() ? edge.getT() : edge.getS();
+                        // skip this neighbor if it wasn't placed yet
+                        if (vertexCoordinateMap.get(neighbor) == null) {
+                            continue;
+                        }
                         edges.add(edge);
+                    }
                     }
                 }
             }
-        } catch (NullPointerException e) {
-
-        }
-    
+        //edges.add(edge);
         repaint();  // Make sure to repaint after updating the edges
     }
 
@@ -257,9 +245,10 @@ public class GraphPanel extends JPanel {
 
         int scaledPointSize = (int) (10 / zoomFactor);
         if(showEdges == true) {
-            System.out.println("Shows Edges");
-             if (edges != null) {
+             if (edges != null ) 
+             
                 g2d.setColor(Color.BLACK);
+               try {
                 for (Edge edge : edges) {
                     int xStart = vertexCoordinateMap.get(edge.getS()).getX();
                     int yStart = vertexCoordinateMap.get(edge.getS()).getY();
@@ -281,9 +270,13 @@ public class GraphPanel extends JPanel {
                     g2d.setStroke(new BasicStroke((int)(1/zoomFactor)));
                 
                     g2d.drawLine((int)(xStart * zoomFactor) , (int)(yStart * zoomFactor),(int) (xEnd* zoomFactor),(int) (yEnd* zoomFactor));
-            }
+                }
+               } catch (ConcurrentModificationException | NullPointerException e) {
+                // TODO: handle exception
+               }
+                
 
-        }
+        
         }
        
         // Draw your points on the panel
