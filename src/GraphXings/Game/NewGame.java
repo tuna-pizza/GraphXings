@@ -99,7 +99,7 @@ public class NewGame
 		}
 		catch (NewInvalidMoveException ex)
 		{
-			System.err.println(ex.getCheater().getName() + " cheated!");
+			System.out.println("E001:" + ex.getCheater().getName() + " cheated!");
 			if (ex.getCheater().equals(player1))
 			{
 				return new NewGameResult(0, 0, player1, player2,true,false,false,false);
@@ -115,7 +115,7 @@ public class NewGame
 		}
 		catch (NewTimeOutException ex)
 		{
-			System.err.println(ex.getTimeOutPlayer().getName() + " ran out of time!");
+			System.out.println("E002:" +ex.getTimeOutPlayer().getName() + " ran out of time!");
 			if (ex.getTimeOutPlayer().equals(player1))
 			{
 				return new NewGameResult(0, 0, player1, player2,false,false,true,false);
@@ -141,7 +141,7 @@ public class NewGame
 	private int playRound(NewPlayer maximizer, NewPlayer minimizer) throws NewInvalidMoveException, NewTimeOutException
 	{
 		int turn = 0;
-		GameState gs = new GameState(width,height);
+		GameState gs = new GameState(g,width,height);
 		GameMove lastMove = null;
 		long timeMaximizer = 0;
 		long timeMinimizer = 0;
@@ -151,7 +151,15 @@ public class NewGame
 			if (turn%2 == 0)
 			{
 				long moveStartTime = System.nanoTime();
-				newMove = maximizer.maximizeCrossings(lastMove);
+				try
+				{
+					newMove = maximizer.maximizeCrossings(lastMove);
+				}
+				catch (Exception ex)
+				{
+					System.out.println("E003:" +maximizer.getName() + " threw a " + ex.getClass() + " exception!");
+					throw new NewInvalidMoveException(maximizer);
+				}
 				timeMaximizer += System.nanoTime()-moveStartTime;
 				if (timeMaximizer > timeLimit)
 				{
@@ -165,7 +173,15 @@ public class NewGame
 			else
 			{
 				long moveStartTime = System.nanoTime();
-				newMove = minimizer.minimizeCrossings(lastMove);
+				try
+				{
+					newMove = minimizer.minimizeCrossings(lastMove);
+				}
+				catch (Exception ex)
+				{
+					System.out.println("E004:" +minimizer.getName() + " threw a " + ex.getClass() + " exception!" );
+					throw new NewInvalidMoveException(minimizer);
+				}
 				timeMinimizer += System.nanoTime()-moveStartTime;
 				if (timeMinimizer > timeLimit)
 				{

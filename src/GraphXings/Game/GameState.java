@@ -13,6 +13,10 @@ import java.util.HashSet;
 public class GameState
 {
 	/**
+	 * The set of vertices contained in the graph.
+	 */
+	private HashSet<Vertex> vertices;
+	/**
 	 * A HashMap mapping vertices to their coordinates if already placed.
 	 */
 	private HashMap<Vertex, Coordinate> vertexCoordinates;
@@ -38,8 +42,13 @@ public class GameState
 	 * @param width The width of the game board.
 	 * @param height The height of the game board.
 	 */
-	public GameState(int width, int height)
+	public GameState(Graph g, int width, int height)
 	{
+		vertices = new HashSet<>();
+		for (Vertex v : g.getVertices())
+		{
+			vertices.add(v);
+		}
 		vertexCoordinates = new HashMap<>();
 		placedVertices = new HashSet<>();
 		usedCoordinates = new int[width][height];
@@ -63,7 +72,11 @@ public class GameState
 	{
 		if (newMove.getVertex() == null ||newMove.getCoordinate() == null)
 		{
-			return  false;
+			return false;
+		}
+		if (!vertices.contains(newMove.getVertex()))
+		{
+			return false;
 		}
 		if (placedVertices.contains(newMove.getVertex()))
 		{

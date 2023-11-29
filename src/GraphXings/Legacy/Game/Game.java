@@ -147,7 +147,7 @@ public class Game
     private int playRound(Player maximizer, Player minimizer) throws InvalidMoveException, TimeOutException
     {
         int turn = 0;
-        GameState gs = new GameState(width,height);
+        GameState gs = new GameState(g,width,height);
         LinkedList<GameMove> gameMoves = new LinkedList<>();
         long timeMaximizer = 0;
         long timeMinimizer = 0;

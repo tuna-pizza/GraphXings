@@ -1,7 +1,6 @@
 package GraphXings.Data;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * A class for maintaining information about a graph.
@@ -142,5 +141,15 @@ public class Graph
             copy.addEdge(e);
         }
         return copy;
+    }
+
+    /**
+     * Shuffles the order of vertices in the vertex set.
+     */
+    public void shuffleIndices()
+    {
+        List<Vertex> toBeShuffled = new ArrayList<>(vertices);
+        Collections.shuffle(toBeShuffled);
+        vertices = new HashSet<>(toBeShuffled);
     }
 }

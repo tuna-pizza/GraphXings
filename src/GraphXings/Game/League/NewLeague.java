@@ -96,6 +96,10 @@ public class NewLeague
 				NewPlayer player2 = players.get(j);
 				NewMatch m = new NewMatch(player1, player2, factory, bestOf, timeLimit);
 				m.setVerbose(isVerbose);
+				if (isVerbose)
+				{
+					System.out.println("Match " + matchNumber + ": " + player1.getName() + " vs. " + player2.getName());
+				}
 				NewMatchResult mr = m.play();
 				if (isVerbose)
 				{

@@ -197,6 +197,7 @@ public class RandomCycleFactory implements GameInstanceFactory
 			Edge e = new Edge(first,next);
 			g.addEdge(e);
 		}
+		g.shuffleIndices();
 		return g;
 	}
 }
