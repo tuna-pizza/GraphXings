@@ -39,6 +39,7 @@ public class GameState
 
 	/**
 	 * Creates a new GameState object describing the initial empty game board.
+	 * @param g The graph to be drawn.
 	 * @param width The width of the game board.
 	 * @param height The height of the game board.
 	 */
