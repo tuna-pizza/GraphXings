@@ -82,6 +82,7 @@ public class MixingPlayer implements NewPlayer {
         this.sampleSize = 30;
         this.percentage = 0.93;
         this.strategy = Strategy.Annealing;
+        this.r = new Random(name.hashCode());
     }
 
     /**
@@ -622,6 +623,9 @@ public class MixingPlayer implements NewPlayer {
         this.g = g;
         this.width = width;
         this.height = height;
+        if (height < this.heatMapSize || width < this.heatMapSize) {
+            this.heatMapSize = 1;
+        }
         this.gs = new GameState(width, height);
         this.betterEdgeCrossingRTree = new BetterEdgeCrossingRTree(g);
         heatMap = new ArrayList<ArrayList<Integer>>();
