@@ -17,6 +17,10 @@ public class GameState
 	 */
 	private HashSet<Vertex> vertices;
 	/**
+	 * The set of vertices contained in the graph.
+	 */
+	private HashSet<Vertex> vertices;
+	/**
 	 * A HashMap mapping vertices to their coordinates if already placed.
 	 */
 	private HashMap<Vertex, Coordinate> vertexCoordinates;
@@ -40,11 +44,18 @@ public class GameState
 	/**
 	 * Creates a new GameState object describing the initial empty game board.
 	 * @param g The graph to be drawn.
+	 * @param g The graph to be drawn.
 	 * @param width The width of the game board.
 	 * @param height The height of the game board.
 	 */
 	public GameState(Graph g, int width, int height)
+	public GameState(Graph g, int width, int height)
 	{
+		vertices = new HashSet<>();
+		for (Vertex v : g.getVertices())
+		{
+			vertices.add(v);
+		}
 		vertices = new HashSet<>();
 		for (Vertex v : g.getVertices())
 		{
