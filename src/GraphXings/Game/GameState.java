@@ -9,7 +9,12 @@ import java.util.HashSet;
 /**
  * A class describing the current state of the game.
  */
-public class GameState {
+public class GameState
+{
+	/**
+	 * The set of vertices contained in the graph.
+	 */
+	private HashSet<Vertex> vertices;
 	/**
 	 * A HashMap mapping vertices to their coordinates if already placed.
 	 */
@@ -33,11 +38,17 @@ public class GameState {
 
 	/**
 	 * Creates a new GameState object describing the initial empty game board.
-	 * 
-	 * @param width  The width of the game board.
+	 * @param g The graph to be drawn.
+	 * @param width The width of the game board.
 	 * @param height The height of the game board.
 	 */
-	public GameState(int width, int height) {
+	public GameState(Graph g, int width, int height)
+	{
+		vertices = new HashSet<>();
+		for (Vertex v : g.getVertices())
+		{
+			vertices.add(v);
+		}
 		vertexCoordinates = new HashMap<>();
 		placedVertices = new HashSet<>();
 		usedCoordinates = new int[width][height];
@@ -56,8 +67,14 @@ public class GameState {
 	 * @param newMove The potential move to be performed.
 	 * @return True if the move is valid, false if it is invalid.
 	 */
-	public boolean checkMoveValidity(GameMove newMove) {
-		if (newMove.getVertex() == null || newMove.getCoordinate() == null) {
+	public boolean checkMoveValidity(GameMove newMove)
+	{
+		if (newMove.getVertex() == null ||newMove.getCoordinate() == null)
+		{
+			return false;
+		}
+		if (!vertices.contains(newMove.getVertex()))
+		{
 			return false;
 		}
 		if (placedVertices.contains(newMove.getVertex())) {

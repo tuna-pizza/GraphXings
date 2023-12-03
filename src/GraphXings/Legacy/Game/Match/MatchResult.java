@@ -1,6 +1,6 @@
-package GraphXings.Game.Match;
+package GraphXings.Legacy.Game.Match;
 
-import GraphXings.Algorithms.Player;
+import GraphXings.Legacy.Algorithms.Player;
 
 /**
  * A class for storing the results of a match.
@@ -73,6 +73,22 @@ public class MatchResult
 	public int getGamesWon2()
 	{
 		return gamesWon2;
+	}
+
+	public Player getWinner()
+	{
+		if (gamesWon1 > gamesWon2)
+		{
+			return player1;
+		}
+		else if (gamesWon2 > gamesWon1)
+		{
+			return player2;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	/**

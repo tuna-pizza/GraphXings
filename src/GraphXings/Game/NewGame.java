@@ -10,6 +10,9 @@ import GraphXings.Algorithms.CrossingCalculator;
 import GraphXings.Algorithms.NewPlayer;
 import GraphXings.Data.Coordinate;
 import GraphXings.Data.Graph;
+import GraphXings.Legacy.Game.InvalidMoveException;
+
+import java.util.Random;
 import GraphXings.NewFiles.GraphPanel;
 
 /**
@@ -102,7 +105,15 @@ public class NewGame {
 	 * 
 	 * @return Provides a GameResult Object containing the game's results.
 	 */
-	public NewGameResult play() {
+	public NewGameResult play()
+	{
+		Random r = new Random(System.nanoTime());
+		if (r.nextBoolean())
+		{
+			NewPlayer swap = player1;
+			player1 = player2;
+			player2 = swap;
+		}
 		if(showGui) {
 			graphPanel.showEdges(setEdges);
 			graphPanel.changeReadyState(false);	
@@ -129,24 +140,38 @@ public class NewGame {
 			player1.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MIN);
 			player2.initializeNextRound(g.copy(), width, height, NewPlayer.Role.MAX);
 			int crossingsGame2 = playRound(player2, player1);
-			return new NewGameResult(crossingsGame1, crossingsGame2, player1, player2, false, false, false, false);
-		} catch (NewInvalidMoveException ex) {
-			System.err.println(ex.getCheater().getName() + " cheated!");
-			if (ex.getCheater().equals(player1)) {
-				return new NewGameResult(0, 0, player1, player2, true, false, false, false);
-			} else if (ex.getCheater().equals(player2)) {
-				return new NewGameResult(0, 0, player1, player2, false, true, false, false);
-			} else {
-				return new NewGameResult(0, 0, player1, player2, false, false, false, false);
+			return new NewGameResult(crossingsGame1,crossingsGame2,player1,player2,false,false,false,false);
+		}
+		catch (NewInvalidMoveException ex)
+		{
+			System.out.println("E001:" + ex.getCheater().getName() + " cheated!");
+			if (ex.getCheater().equals(player1))
+			{
+				return new NewGameResult(0, 0, player1, player2,true,false,false,false);
 			}
-		} catch (NewTimeOutException ex) {
-			System.err.println(ex.getTimeOutPlayer().getName() + " ran out of time!");
-			if (ex.getTimeOutPlayer().equals(player1)) {
-				return new NewGameResult(0, 0, player1, player2, false, false, true, false);
-			} else if (ex.getTimeOutPlayer().equals(player2)) {
-				return new NewGameResult(0, 0, player1, player2, false, false, false, true);
-			} else {
-				return new NewGameResult(0, 0, player1, player2, false, false, false, false);
+			else if (ex.getCheater().equals(player2))
+			{
+				return new NewGameResult(0,0,player1,player2,false,true,false,false);
+			}
+			else
+			{
+				return new NewGameResult(0,0,player1,player2,false,false,false,false);
+			}
+		}
+		catch (NewTimeOutException ex)
+		{
+			System.out.println("E002:" +ex.getTimeOutPlayer().getName() + " ran out of time!");
+			if (ex.getTimeOutPlayer().equals(player1))
+			{
+				return new NewGameResult(0, 0, player1, player2,false,false,true,false);
+			}
+			else if (ex.getTimeOutPlayer().equals(player2))
+			{
+				return new NewGameResult(0,0,player1,player2,false,false,false,true);
+			}
+			else
+			{
+				return new NewGameResult(0,0,player1,player2,false,false,false,false);
 			}
 
 		}
@@ -164,7 +189,7 @@ public class NewGame {
 	private int playRound(NewPlayer maximizer, NewPlayer minimizer)
 			throws NewInvalidMoveException, NewTimeOutException {
 		int turn = 0;
-		GameState gs = new GameState(width, height);
+		GameState gs = new GameState(g,width,height);
 		GameMove lastMove = null;
 		long timeMaximizer = 0;
 		long timeMinimizer = 0;
@@ -173,9 +198,18 @@ public class NewGame {
 			GameMove newMove;
 			if (turn % 2 == 0) {
 				long moveStartTime = System.nanoTime();
-				newMove = maximizer.maximizeCrossings(lastMove);
-				timeMaximizer += System.nanoTime() - moveStartTime;
-				if (timeMaximizer > timeLimit) {
+				try
+				{
+					newMove = maximizer.maximizeCrossings(lastMove);
+				}
+				catch (Exception ex)
+				{
+					System.out.println("E003:" +maximizer.getName() + " threw a " + ex.getClass() + " exception!");
+					throw new NewInvalidMoveException(maximizer);
+				}
+				timeMaximizer += System.nanoTime()-moveStartTime;
+				if (timeMaximizer > timeLimit)
+				{
 					throw new NewTimeOutException(maximizer);
 				}
 				if (!gs.checkMoveValidity(newMove)) {
@@ -183,9 +217,18 @@ public class NewGame {
 				}
 			} else {
 				long moveStartTime = System.nanoTime();
-				newMove = minimizer.minimizeCrossings(lastMove);
-				timeMinimizer += System.nanoTime() - moveStartTime;
-				if (timeMinimizer > timeLimit) {
+				try
+				{
+					newMove = minimizer.minimizeCrossings(lastMove);
+				}
+				catch (Exception ex)
+				{
+					System.out.println("E004:" +minimizer.getName() + " threw a " + ex.getClass() + " exception!" );
+					throw new NewInvalidMoveException(minimizer);
+				}
+				timeMinimizer += System.nanoTime()-moveStartTime;
+				if (timeMinimizer > timeLimit)
+				{
 					throw new NewTimeOutException(minimizer);
 				}
 				if (!gs.checkMoveValidity(newMove)) {

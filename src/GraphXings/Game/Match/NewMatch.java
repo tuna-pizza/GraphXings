@@ -30,7 +30,10 @@ public class NewMatch {
 	 * The time limit for each game in the match.
 	 */
 	private long gameTimeLimit;
-
+	/**
+	 * If true, print all game results (true by default).
+	 */
+	private boolean isVerbose;
 	/**
 	 * Constructs a match object.
 	 * 
@@ -45,6 +48,7 @@ public class NewMatch {
 		this.bestOutOf = bestOutOf;
 		this.factory = factory;
 		this.gameTimeLimit = Long.MAX_VALUE;
+		isVerbose = true;
 	}
 
 	/**
@@ -64,6 +68,7 @@ public class NewMatch {
 		this.bestOutOf = bestOutOf;
 		this.factory = factory;
 		this.gameTimeLimit = gameTimeLimit;
+		isVerbose = true;
 	}
 
 	/**
@@ -81,11 +86,15 @@ public class NewMatch {
 			NewGame game = new NewGame(gi.getG(), gi.getWidth(), gi.getHeight(), player1, player2, gameTimeLimit);
 			NewGameResult gr = game.play();
 			gamesPlayed++;
-			if (gamesPlayed == 5) {
-				System.out.println("here");
+			if (isVerbose)
+			{
+				System.out.println("Game " + gamesPlayed + ": " + gr.announceResult());
 			}
-			System.out.println("Game " + gamesPlayed + ": " + gr.announceResult());
-			if (gamesPlayed > 2 * bestOutOf) {
+		// if (gamesPlayed == 5) {
+			// 	System.out.println("here");
+			// }
+			if (gamesPlayed > 2*bestOutOf)
+			{
 				end = true;
 			}
 			if (gr.getWinner() == null) {
@@ -105,5 +114,14 @@ public class NewMatch {
 			}
 		}
 		return new NewMatchResult(player1, player2, gamesWon1, gamesWon2);
+	}
+
+	/**
+	 * Sets whether or not all intermediate game results should be displayed.
+	 * @param verbose True, if intermediate results should be displayed, false otherwise.
+	 */
+	public void setVerbose(boolean verbose)
+	{
+		this.isVerbose = verbose;
 	}
 }

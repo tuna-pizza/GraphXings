@@ -8,17 +8,17 @@ public class Rational
     /**
      * The numerator.
      */
-    private int p;
+    private long p;
     /**
      * The denominator.
      */
-    private int q;
+    private long q;
 
     /**
      * Creates a rational number from an int.
      * @param n An integer.
      */
-    public Rational (int n)
+    public Rational (long n)
     {
         p = n;
         q = 1;
@@ -29,7 +29,7 @@ public class Rational
      * @param p The numerator.
      * @param q The denominator.
      */
-    public Rational (int p, int q)
+    public Rational (long p, long q)
     {
         if (q == 0)
         {
@@ -44,7 +44,7 @@ public class Rational
      * Gets the numerator.
      * @return The numerator.
      */
-    public int getP()
+    public long getP()
     {
         return p;
     }
@@ -53,7 +53,7 @@ public class Rational
      * Gets the denominator.
      * @return The denominator.
      */
-    public int getQ()
+    public long getQ()
     {
         return q;
     }
@@ -78,7 +78,7 @@ public class Rational
             p = -p;
             q = -q;
         }
-        int gcd = gcd(p,q);
+        long gcd = gcd(p,q);
         p = p/gcd;
         q = q/gcd;
         if (p==0)
@@ -93,13 +93,13 @@ public class Rational
      * @param b The second integer.
      * @return The gcd of a and b.
      */
-    private int gcd(int a, int b)
+    private long gcd(long a, long b)
     {
         a = Math.abs(a);
         b = Math.abs(b);
         if (a < b)
         {
-            int swap = b;
+            long swap = b;
             b = a;
             a = swap;
         }
@@ -107,7 +107,7 @@ public class Rational
         {
             return 1;
         }
-        int c = a % b;
+        long c = a % b;
         if (c == 0)
         {
             return b;

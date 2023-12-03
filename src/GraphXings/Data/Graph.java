@@ -1,7 +1,6 @@
 package GraphXings.Data;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * A class for maintaining information about a graph.
@@ -13,9 +12,13 @@ public class Graph
      */
     private HashSet<Vertex> vertices;
     /**
+     * The edge set.
+     */
+    private HashSet<Edge> edges;
+    /**
      * The adjacency list representation.
      */
-    private HashMap<Vertex,HashSet<Edge>> edges;
+    private HashMap<Vertex,HashSet<Edge>> adjacentEdges;
     /**
      * The number of vertices.
      */
@@ -31,7 +34,8 @@ public class Graph
     public Graph()
     {
         vertices = new HashSet<>();
-        edges = new HashMap<>();
+        edges = new HashSet<>();
+        adjacentEdges = new HashMap<>();
         n = 0;
         m = 0;
     }
@@ -45,7 +49,7 @@ public class Graph
         if (!vertices.contains(v))
         {
             vertices.add(v);
-            edges.put(v,new HashSet<>());
+            adjacentEdges.put(v,new HashSet<>());
             n++;
         }
     }
@@ -59,10 +63,11 @@ public class Graph
     {
         if (vertices.contains(e.getS())&&vertices.contains(e.getT()))
         {
-            if (!edges.get(e.getS()).contains(e))
+            if (!adjacentEdges.get(e.getS()).contains(e))
             {
-                edges.get(e.getS()).add(e);
-                edges.get(e.getT()).add(e);
+                adjacentEdges.get(e.getS()).add(e);
+                adjacentEdges.get(e.getT()).add(e);
+                edges.add(e);
                 m++;
                 return true;
             }
@@ -76,8 +81,7 @@ public class Graph
      */
     public Iterable<Vertex> getVertices()
     {
-        HashSet<Vertex> result = new HashSet<>(vertices);
-        return result;
+        return vertices;
     }
 
     /**
@@ -91,8 +95,7 @@ public class Graph
         {
             return null;
         }
-        HashSet<Edge> result = new HashSet<>(edges.get(v));
-        return result;
+        return adjacentEdges.get(v);
     }
 
     /**
@@ -101,18 +104,7 @@ public class Graph
      */
     public Iterable<Edge> getEdges()
     {
-        HashSet<Edge> result = new HashSet<>();
-        for (Vertex v : vertices)
-        {
-            for (Edge e : edges.get(v))
-            {
-                if (!result.contains(e))
-                {
-                    result.add(e);
-                }
-            }
-        }
-        return result;
+        return edges;
     }
 
     /**
@@ -135,7 +127,7 @@ public class Graph
 
     /**
      * Creates a functionally equivalent copy of the graph that uses different references.
-     * @return A Graph object containign a copy of the graph.
+     * @return A Graph object containing a copy of the graph.
      */
     public Graph copy()
     {
@@ -144,13 +136,20 @@ public class Graph
         {
             copy.addVertex(v);
         }
-        for (Vertex v : vertices)
+        for (Edge e : edges)
         {
-            for (Edge e : edges.get(v))
-            {
-                copy.addEdge(e);
-            }
+            copy.addEdge(e);
         }
         return copy;
+    }
+
+    /**
+     * Shuffles the order of vertices in the vertex set.
+     */
+    public void shuffleIndices()
+    {
+        List<Vertex> toBeShuffled = new ArrayList<>(vertices);
+        Collections.shuffle(toBeShuffled);
+        vertices = new HashSet<>(toBeShuffled);
     }
 }

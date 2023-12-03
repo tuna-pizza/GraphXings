@@ -78,7 +78,7 @@ public class NewRandomPlayer implements NewPlayer {
 		this.g = g;
 		this.width = width;
 		this.height = height;
-		this.gs = new GameState(width, height);
+		this.gs = new GameState(g,width,height);
 	}
 
 	/**

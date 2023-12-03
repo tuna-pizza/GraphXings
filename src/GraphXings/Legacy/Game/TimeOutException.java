@@ -1,6 +1,6 @@
-package GraphXings.Game;
+package GraphXings.Legacy.Game;
 
-import GraphXings.Algorithms.Player;
+import GraphXings.Legacy.Algorithms.Player;
 
 /**
  * An exception that can be thrown when a time out occured.
