@@ -1,6 +1,7 @@
 package GraphXings.Game;
 
 import GraphXings.Data.Coordinate;
+import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 
 import java.util.HashMap;

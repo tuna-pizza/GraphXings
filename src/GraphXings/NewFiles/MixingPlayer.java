@@ -693,7 +693,7 @@ public class MixingPlayer implements NewPlayer {
         if (height < this.heatMapSize || width < this.heatMapSize) {
             this.heatMapSize = 1;
         }
-        this.gs = new GameState(width, height);
+        this.gs = new GameState(g, width, height);
         this.betterEdgeCrossingRTree = new BetterEdgeCrossingRTree(g);
         heatMap = new ArrayList<ArrayList<Integer>>();
         lastNVertices = new ArrayList<>();

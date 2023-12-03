@@ -1,9 +1,11 @@
 package GraphXings;
 
 import GraphXings.Algorithms.NewPlayer;
+import GraphXings.Algorithms.NewRandomPlayer;
 import GraphXings.Game.GameInstance.RandomCycleFactory;
 import GraphXings.Game.League.NewLeague;
 import GraphXings.Game.League.NewLeagueResult;
+import GraphXings.NewFiles.MixingPlayer;
 
 import java.util.ArrayList;
 
@@ -13,6 +15,12 @@ public class GraphXings
     {
         ArrayList<NewPlayer> players = new ArrayList<>();
         //TODO: add players here
+        players.add(new MixingPlayer("MixingPlayer1"));
+        players.add(new MixingPlayer("MixingPlayer2"));
+        players.add(new MixingPlayer("MixingPlayer3"));
+        players.add(new NewRandomPlayer("NewRandomPlayer1"));
+        players.add(new NewRandomPlayer("NewRandomPlayer2"));
+
         RandomCycleFactory factory = new RandomCycleFactory(24091869, true);
         long timeLimit = 300000000000l;
         NewLeague l = new NewLeague(players,3,timeLimit,factory);

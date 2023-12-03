@@ -24,7 +24,7 @@ public class NewGame {
 	 * @true: Shows gui
 	 * @false: does not show gui
 	 */
-	private boolean showGui = true;
+	private boolean showGui = false;
 
 	/**
 	 * @true: a pause between each vertex placement
@@ -258,7 +258,7 @@ public class NewGame {
 			lastMove = newMove;
 			turn++;
 		}
-		System.out.println((System.nanoTime() - startTime) / 1000000 + "ms");
+		// System.out.println((System.nanoTime() - startTime) / 1000000 + "ms");
 		if(showGui == true) {
 			graphPanel.changeReadyState(true);
 		}
