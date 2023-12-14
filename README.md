@@ -19,20 +19,20 @@ The structure of the package GraphXings is as follows:
   * Class GameState models the current state of a GraphXings game. The validity of a GameMove can be checked using the current GameState and the GameState can be updated according to a new GameMove.
   * Classes NewInvalidMoveException and NewTimeOutException provide exceptions that can be thrown in case a player attempts to cheat or runs out of time.
   * Subpackage GameInstance contains:
-    ° Class GameInstance that describes the setting of a game consisting of a graph to be drawn and a specification of the width and height of the drawing area.
-    ° Interface GameInstanceFactory provides a factory that generates GameInstances which can be queried by several consecutive games.
-    ° ConstantGameInstanceFactory provides a factory always providing the same GameInstance.
-    ° RandomCycleFactory provides a factory that creates a cycle possibly extended by a random matching of the cycle's vertices.
-    ° PlanarExampleInstanceFactory produces either of two small planar example graphs.
-    ° PlantriGameInstanceFactory can read a random graph from a file created by software plantri and construct a corresponding GameInstance.
-    ° PlanarGameInstanceFactory computes GameInstance based on either a random triangulation, a random cubic planar graph or a random subgraph of a triangulation.
-    ° MultiGameInstanceFactory allows to randomly select between several GameInstanceFactories to produce the next GameInstance.
+    ~ Class GameInstance that describes the setting of a game consisting of a graph to be drawn and a specification of the width and height of the drawing area.
+    ~ Interface GameInstanceFactory provides a factory that generates GameInstances which can be queried by several consecutive games.
+    ~ ConstantGameInstanceFactory provides a factory always providing the same GameInstance.
+    ~ RandomCycleFactory provides a factory that creates a cycle possibly extended by a random matching of the cycle's vertices.
+    ~ PlanarExampleInstanceFactory produces either of two small planar example graphs.
+    ~ PlantriGameInstanceFactory can read a random graph from a file created by software plantri and construct a corresponding GameInstance.
+    ~ PlanarGameInstanceFactory computes GameInstance based on either a random triangulation, a random cubic planar graph or a random subgraph of a triangulation.
+    ~ MultiGameInstanceFactory allows to randomly select between several GameInstanceFactories to produce the next GameInstance.
   * Subpackage Match contains:
-    ° Class NewMatch allows to run a best-of-k games match between two players. Requires a GameInstanceFactory for generating GameInstances to be used in the k games.
-    ° Class NewMatchResult is a wrapper to convey the results of a full match.
+    ~ Class NewMatch allows to run a best-of-k games match between two players. Requires a GameInstanceFactory for generating GameInstances to be used in the k games.
+    ~ Class NewMatchResult is a wrapper to convey the results of a full match.
   * Subpackage League contains:
-    ° Class NewLeague allows to run a league involving a set of players. Each pair of players will be matched once against each other in a best-of-k NewMatch. Requires a GameInstanceFactory for generating GameInstances.
-    ° Class NewLeagueResult is a wrapper to convey the results of a full league.
+    ~ Class NewLeague allows to run a league involving a set of players. Each pair of players will be matched once against each other in a best-of-k NewMatch. Requires a GameInstanceFactory for generating GameInstances.
+    ~ Class NewLeagueResult is a wrapper to convey the results of a full league.
 - Package Legacy provides legacy support for the old Player interface. Decrepated.
 - The main function is contained in GraphXings.java. It creates a list of players that may be filled by the user and then runs a league between those players using RandomCycleFactory and a timeout of 5mins per Game.
 
