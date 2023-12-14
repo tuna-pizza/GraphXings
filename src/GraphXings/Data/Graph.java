@@ -152,4 +152,24 @@ public class Graph
         Collections.shuffle(toBeShuffled);
         vertices = new HashSet<>(toBeShuffled);
     }
+
+    /**
+     * Provides the adjacency list representation of the graph.
+     * @return The adjacency list representation.
+     */
+    @Override
+    public String toString()
+    {
+        String out = "";
+        for (Vertex v : vertices)
+        {
+            out += v.getId() + ": [";
+            for (Edge e: adjacentEdges.get(v))
+            {
+                out += "(" + e.getS().getId() +"," + e.getT().getId() +"),";
+            }
+            out += "]\n";
+        }
+        return out;
+    }
 }

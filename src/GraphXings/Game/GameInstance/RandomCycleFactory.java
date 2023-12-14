@@ -2,6 +2,8 @@ package GraphXings.Game.GameInstance;
 
 import java.util.HashSet;
 import java.util.Random;
+
+import GraphXings.Algorithms.IntegerMaths;
 import GraphXings.Data.Graph;
 import GraphXings.Data.Vertex;
 import GraphXings.Data.Edge;
@@ -53,7 +55,7 @@ public class RandomCycleFactory implements GameInstanceFactory
 	public GameInstance getGameInstance()
 	{
 		int n_exp = r.nextInt(3) + 2;
-		int n = r.nextInt(pow(10,n_exp-1)*9)+pow(10,n_exp-1);
+		int n = r.nextInt(IntegerMaths.pow(10,n_exp-1)*9)+IntegerMaths.pow(10,n_exp-1);
 		Graph g = createCycle(n);
 		if (includeMatchingEdges)
 		{
@@ -149,26 +151,10 @@ public class RandomCycleFactory implements GameInstanceFactory
 			{
 				h_exp = r.nextInt(4) + 1;
 			}
-			width = r.nextInt(pow(10,w_exp-1)*9)+pow(10,w_exp-1);
-			height = r.nextInt(pow(10,h_exp-1)*9)+pow(10,h_exp-1);
+			width = r.nextInt(IntegerMaths.pow(10,w_exp-1)*9)+IntegerMaths.pow(10,w_exp-1);
+			height = r.nextInt(IntegerMaths.pow(10,h_exp-1)*9)+IntegerMaths.pow(10,h_exp-1);
 		}
 		return new GameInstance(g,width,height);
-	}
-
-	/**
-	 * Computes the power of an int.
-	 * @param base An integer base.
-	 * @param exp An integer exponent.
-	 * @return The integer power.
-	 */
-	private int pow (int base, int exp)
-	{
-		int res = 1;
-		for (int i = 0; i < exp; i++)
-		{
-			res *= base;
-		}
-		return res;
 	}
 
 	/**
