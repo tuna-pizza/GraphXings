@@ -42,6 +42,14 @@ public class NewLeague
 	 */
 	private boolean isVerbose;
 	/**
+	 * The type of matches to be played in the league.
+	 */
+	private NewMatch.MatchType matchType;
+	/**
+	 * The seed to be used for calling constructors of matches.
+	 */
+	private long seed;
+	/**
 	 * Creates a new league object.
 	 * @param players A list of the participating players.
 	 * @param bestOf The number of games per match.
@@ -56,6 +64,8 @@ public class NewLeague
 		pointsPerGameWon = 3;
 		pointsPerTie = 1;
 		isVerbose = true;
+		matchType = NewMatch.MatchType.CROSSING_NUMBER;
+		this.seed = System.nanoTime();
 	}
 
 	/**
@@ -74,6 +84,51 @@ public class NewLeague
 		pointsPerGameWon = 3;
 		pointsPerTie = 1;
 		isVerbose = true;
+		this.matchType = NewMatch.MatchType.CROSSING_NUMBER;
+		this.seed = System.nanoTime();
+	}
+
+	/**
+	 * Creates a new league object.
+	 * @param players A list of the participating players.
+	 * @param bestOf The number of games per match.
+	 * @param factory The factory for creating game instances.
+	 * @param timeLimit The time limit per game round.
+	 * @param matchType The type of matches to be played in the league.
+	 */
+	public NewLeague(List<NewPlayer> players, int bestOf, long timeLimit, GameInstanceFactory factory, NewMatch.MatchType matchType)
+	{
+		this.players = players;
+		this.bestOf = bestOf;
+		this.timeLimit = timeLimit;
+		this.factory = factory;
+		pointsPerGameWon = 3;
+		pointsPerTie = 1;
+		isVerbose = true;
+		this.matchType = matchType;
+		this.seed = System.nanoTime();
+	}
+
+	/**
+	 * Creates a new league object.
+	 * @param players A list of the participating players.
+	 * @param bestOf The number of games per match.
+	 * @param factory The factory for creating game instances.
+	 * @param timeLimit The time limit per game round.
+	 * @param matchType The type of matches to be played in the league.
+	 * @param seed The seed to be used by matches to select the game's objective if matchType is MIXED.
+	 */
+	public NewLeague(List<NewPlayer> players, int bestOf, long timeLimit, GameInstanceFactory factory, NewMatch.MatchType matchType, long seed)
+	{
+		this.players = players;
+		this.bestOf = bestOf;
+		this.timeLimit = timeLimit;
+		this.factory = factory;
+		pointsPerGameWon = 3;
+		pointsPerTie = 1;
+		isVerbose = true;
+		this.matchType = matchType;
+		this.seed = seed;
 	}
 
 	/**
@@ -94,7 +149,7 @@ public class NewLeague
 			{
 				NewPlayer player1 = players.get(i);
 				NewPlayer player2 = players.get(j);
-				NewMatch m = new NewMatch(player1, player2, factory, bestOf, timeLimit);
+				NewMatch m = new NewMatch(player1, player2, factory, bestOf, timeLimit,matchType,seed);
 				m.setVerbose(isVerbose);
 				if (isVerbose)
 				{

@@ -8,13 +8,17 @@ import GraphXings.Algorithms.NewPlayer;
 public class NewGameResult
 {
 	/**
+	 * The objective of the played game.
+	 */
+	private NewGame.Objective objective;
+	/**
 	 * The number of crossings in the first round.
 	 */
-	private int crossingsGame1;
+	private double scoreGame1;
 	/**
 	 * The number of crossings in the second round.
 	 */
-	private int crossingsGame2;
+	private double scoreGame2;
 	/**
 	 * Player 1.
 	 */
@@ -42,25 +46,27 @@ public class NewGameResult
 
 	/**
 	 * Constructs a GameResult object for storing the results of a GraphXings game!
-	 * @param crossingsGame1 The number of crossings in the first round.
-	 * @param crossingsGame2 The number of crossings in the second round.
+	 * @param scoreGame1 The number of crossings in the first round.
+	 * @param scoreGame2 The number of crossings in the second round.
 	 * @param player1 The first player that maximized the number of crossings in the first round.
 	 * @param player2 The second player that maximized the number of crossings in the second round.
 	 * @param cheatingPlayer1 True, if player 1 cheated, false otherwise.
 	 * @param cheatingPlayer2 True, if player 2 cheated, false otherwise.
 	 * @param timeOutPlayer1 True, if player 1 ran out of time, false otherwise.
 	 * @param timeOutPlayer2 True, if player 1 ran out of time, false otherwise.
+	 * @param objective The objective of the game played.
 	 */
-	public NewGameResult(int crossingsGame1, int crossingsGame2, NewPlayer player1, NewPlayer player2, boolean cheatingPlayer1, boolean cheatingPlayer2, boolean timeOutPlayer1, boolean timeOutPlayer2)
+	public NewGameResult(double scoreGame1, double scoreGame2, NewPlayer player1, NewPlayer player2, boolean cheatingPlayer1, boolean cheatingPlayer2, boolean timeOutPlayer1, boolean timeOutPlayer2, NewGame.Objective objective)
 	{
-		this.crossingsGame1 = crossingsGame1;
-		this.crossingsGame2 = crossingsGame2;
+		this.scoreGame1 = scoreGame1;
+		this.scoreGame2 = scoreGame2;
 		this.player1 = player1;
 		this.player2 = player2;
 		this.cheatingPlayer1 = cheatingPlayer1;
 		this.cheatingPlayer2 = cheatingPlayer2;
 		this.timeOutPlayer1 = timeOutPlayer1;
 		this.timeOutPlayer2 = timeOutPlayer2;
+		this.objective = objective;
 	}
 
 	/**
@@ -85,12 +91,12 @@ public class NewGameResult
 		{
 			return player1;
 		}
-		if (crossingsGame1 == crossingsGame2)
+		if (scoreGame1 == scoreGame2)
 		{
 			return null;
 		}
 		NewPlayer winner;
-		if (crossingsGame1 > crossingsGame2)
+		if (scoreGame1 > scoreGame2)
 		{
 			winner = player1;
 		}
@@ -125,7 +131,14 @@ public class NewGameResult
 		NewPlayer winner = getWinner();
 		if (winner == null)
 		{
-			return ("It's a tie between " + player1.getName() + " and " + player2.getName() + " with " + crossingsGame1 + " crossings!");
+			if (objective.equals(NewGame.Objective.CROSSING_NUMBER))
+			{
+				return ("It's a tie between " + player1.getName() + " and " + player2.getName() + " with " + scoreGame1 + " crossings!");
+			}
+			else
+			{
+				return ("It's a tie between " + player1.getName() + " and " + player2.getName() + " with " + scoreGame1 + " points!");
+			}
 		}
 		else
 		{
@@ -138,7 +151,14 @@ public class NewGameResult
 			{
 				looser = player1;
 			}
-			return (winner.getName() + " beats " + looser.getName() + " with " + crossingsGame1 + ":" + crossingsGame2 + " crossings!");
+			if (objective.equals(NewGame.Objective.CROSSING_NUMBER))
+			{
+				return (winner.getName() + " beats " + looser.getName() + " with " + scoreGame1 + ":" + scoreGame2 + " crossings!");
+			}
+			else
+			{
+				return (winner.getName() + " beats " + looser.getName() + " with " + scoreGame1 + ":" + scoreGame2 + " points!");
+			}
 		}
 	}
 }

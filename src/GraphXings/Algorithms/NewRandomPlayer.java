@@ -77,6 +77,38 @@ public class NewRandomPlayer implements NewPlayer
 	}
 
 	@Override
+	public GameMove maximizeCrossingAngles(GameMove lastMove)
+	{
+		// First: Apply the last move by the opponent.
+		if (lastMove != null)
+		{
+			gs.applyMove(lastMove);
+		}
+		// Second: Compute the new move.
+		GameMove randomMove = randomMove();
+		// Third: Apply the new move to the local GameState.
+		gs.applyMove(randomMove);
+		// Finally: Return the new move.
+		return randomMove;
+	}
+
+	@Override
+	public GameMove minimizeCrossingAngles(GameMove lastMove)
+	{
+		// First: Apply the last move by the opponent.
+		if (lastMove != null)
+		{
+			gs.applyMove(lastMove);
+		}
+		// Second: Compute the new move.
+		GameMove randomMove = randomMove();
+		// Third: Apply the new move to the local GameState.
+		gs.applyMove(randomMove);
+		// Finally: Return the new move.
+		return randomMove;
+	}
+
+	@Override
 	public void initializeNextRound(Graph g, int width, int height, Role role)
 	{
 		// Store graph, width, height and create a new GameState.

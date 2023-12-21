@@ -200,4 +200,33 @@ public class Segment
             }
         }
     }
+
+    public static double squaredCosineOfAngle(Segment s1, Segment s2)
+    {
+        if (s1.isVertical() && s2.isVertical())
+        {
+            return 1;
+        }
+        if (s2.isVertical())
+        {
+            Segment swap = s1;
+            s1 = s2;
+            s2 = swap;
+        }
+        double ax;
+        double ay;
+        if (s1.isVertical())
+        {
+            ax = 0;
+            ay = 1;
+        }
+        else
+        {
+            ax = s1.getA().getQ();
+            ay = s1.getA().getP();
+        }
+        double bx = s2.getA().getQ();
+        double by = s2.getA().getP();
+        return Math.pow((ax * bx +  ay * by)/(Math.sqrt(Math.pow(ax,2)+Math.pow(ay,2))*Math.sqrt(Math.pow(bx,2)+Math.pow(by,2))),2);
+    }
 }

@@ -20,6 +20,19 @@ public interface NewPlayer
 	public GameMove minimizeCrossings(GameMove lastMove);
 
 	/**
+	 * Tells the player to perform the next move where the objective is to create crossings of low crossing angles! In a valid move, an unplaced vertex of g is positioned onto a free coordinate.
+	 * @param lastMove The last move performed by the opposing player. Is null if it is the first move!
+	 * @return The move to be performed.
+	 */
+	public GameMove maximizeCrossingAngles(GameMove lastMove);
+	/**
+	 * Tells the player to perform the next move where the objective is to avoid crossings of low crossings angles! In a valid move, an unplaced vertex of g is positioned onto a free coordinate.
+	 * @param lastMove The last move performed by the opposing player. Is null if it is the first move!
+	 * @return The move to be performed.
+	 */
+	public GameMove minimizeCrossingAngles(GameMove lastMove);
+
+	/**
 	 * Tells the player to get ready for the next round.
 	 * @param g The graph to be drawn in the next round.
 	 * @param width The width of the game board.
@@ -35,6 +48,10 @@ public interface NewPlayer
 
 	/**
 	 * An enum describing the role of the player in the next round.
+	 * MAX - The objective is to maximize the number of crossings.
+	 * MIN - The objective is to minimize the number of crossings.
+	 * MAX_ANGLE - The objective is to maximize the sum of the squared cosines of the crossing angles.
+	 * MIN_ANGLE - The objective is to minimize the sum of the squared cosines of the crossing angles.
 	 */
-	public enum Role {MAX,MIN};
+	public enum Role {MAX,MIN,MAX_ANGLE,MIN_ANGLE};
 }
